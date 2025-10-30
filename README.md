@@ -1,2 +1,2 @@
-# claude-skills
+# Claude Skills
 Claude Skills
