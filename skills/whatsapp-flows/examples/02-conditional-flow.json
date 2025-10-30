@@ -1,0 +1,145 @@
+{
+  "version": "7.1",
+  "screens": [
+    {
+      "id": "AGE_VERIFICATION",
+      "title": "Age Check",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Age Verification"
+          },
+          {
+            "type": "TextInput",
+            "name": "age",
+            "label": "Enter your age",
+            "input-type": "number",
+            "required": true
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "action": "navigate",
+              "next_screen": "CHECK_ELIGIBILITY"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "CHECK_ELIGIBILITY",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "If",
+            "condition": "${`${form.age} >= 18`}",
+            "then": [
+              {
+                "type": "TextHeading",
+                "text": "Eligible!"
+              },
+              {
+                "type": "TextBody",
+                "text": "You are eligible for our premium services."
+              },
+              {
+                "type": "Footer",
+                "label": "Proceed",
+                "on-click-action": {
+                  "action": "navigate",
+                  "next_screen": "ELIGIBLE_PATH"
+                }
+              }
+            ],
+            "else": [
+              {
+                "type": "TextHeading",
+                "text": "Not Eligible"
+              },
+              {
+                "type": "TextBody",
+                "text": "You must be 18 or older to proceed. Parental consent may be required."
+              },
+              {
+                "type": "Footer",
+                "label": "Request Consent",
+                "on-click-action": {
+                  "action": "navigate",
+                  "next_screen": "REQUEST_PARENTAL_CONSENT"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "ELIGIBLE_PATH",
+      "title": "Premium Services",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Welcome to Premium"
+          },
+          {
+            "type": "TextBody",
+            "text": "You now have access to all premium features."
+          },
+          {
+            "type": "Footer",
+            "label": "Done",
+            "on-click-action": {
+              "action": "complete",
+              "payload": {
+                "status": "eligible",
+                "age": "${form.age}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "REQUEST_PARENTAL_CONSENT",
+      "title": "Parental Consent",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Parental Consent Required"
+          },
+          {
+            "type": "TextBody",
+            "text": "We need a parent or guardian's consent for users under 18."
+          },
+          {
+            "type": "TextInput",
+            "name": "parent_email",
+            "label": "Parent/Guardian Email",
+            "input-type": "email",
+            "required": true
+          },
+          {
+            "type": "Footer",
+            "label": "Send Consent Form",
+            "on-click-action": {
+              "action": "complete",
+              "payload": {
+                "status": "pending_consent",
+                "age": "${form.age}",
+                "parent_email": "${form.parent_email}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

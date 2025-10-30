@@ -1,0 +1,147 @@
+{
+  "name": "whatsapp-flows",
+  "version": "1.0.0",
+  "description": "Expert guidance for authoring WhatsApp Business Account Flows with comprehensive progressive reference documentation and validation tools",
+  "author": "Anthropic",
+  "tags": ["whatsapp", "flows", "conversational-design", "form-builder", "mobile"],
+  "categories": ["messaging", "automation", "business-tools"],
+  "documentation": {
+    "structure": "progressive-tiers",
+    "total_references": 20,
+    "organization": [
+      {
+        "tier": 1,
+        "name": "Core Concepts (Essential)",
+        "docs": ["01-core-structure.md", "02-data-model.md"],
+        "load": "always"
+      },
+      {
+        "tier": 2,
+        "name": "Text Components",
+        "docs": ["03-text-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 3,
+        "name": "Input Components",
+        "docs": ["04-input-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 4,
+        "name": "Selection Components",
+        "docs": ["05-selection-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 5,
+        "name": "Date & Time Components",
+        "docs": ["06-date-time-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 6,
+        "name": "Media Components",
+        "docs": ["07-media-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 7,
+        "name": "Rich Content & Navigation",
+        "docs": ["08-rich-content.md", "09-navigation-components.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 8,
+        "name": "Conditional Logic",
+        "docs": ["10-conditional-logic.md", "11-nested-expressions.md", "12-global-referencing.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 9,
+        "name": "Actions & Interactions",
+        "docs": ["13-actions.md", "14-footer-component.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 10,
+        "name": "Server Integration & Advanced",
+        "docs": ["15-routing-model.md", "16-data-endpoints.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 11,
+        "name": "Validation & Quality",
+        "docs": ["17-validation-rules.md", "18-sensitive-data.md"],
+        "load": "on-demand"
+      },
+      {
+        "tier": 12,
+        "name": "Reference & Versions",
+        "docs": ["19-version-features.md", "20-quick-reference.md"],
+        "load": "on-demand"
+      }
+    ]
+  },
+  "tools": {
+    "validation": [
+      {
+        "name": "validate_flow.py",
+        "description": "Main Flow JSON validator - checks structure, required properties, component limits, routing consistency"
+      },
+      {
+        "name": "validate_components.py",
+        "description": "Component-specific validator - validates individual component constraints and properties"
+      }
+    ]
+  },
+  "examples": [
+    {
+      "name": "01-simple-form.json",
+      "description": "Multi-screen survey form with name collection, rating selection, and feedback textarea"
+    },
+    {
+      "name": "02-conditional-flow.json",
+      "description": "Age verification with conditional branching - eligible vs ineligible paths with parental consent"
+    },
+    {
+      "name": "03-product-selection.json",
+      "description": "E-commerce product selection with dynamic product list from server data"
+    }
+  ],
+  "features": [
+    "20 comprehensive reference documents organized in 12 progressive tiers",
+    "Components: Text, Input, Selection, Date, Media, Rich Content, Navigation",
+    "Advanced features: Conditional logic, Nested expressions, Global referencing, Actions",
+    "Server integration: Routing models, Data endpoints, Dynamic data binding",
+    "Validation tools: Flow JSON validator, Component-specific validator",
+    "Best practices and design patterns included",
+    "Version compatibility matrix (v4.0 - v7.1)",
+    "Character limits, component constraints, validation rules",
+    "Security guidance for sensitive data handling",
+    "3 complete example flows demonstrating different patterns"
+  ],
+  "key_commands": [
+    "/whatsapp-reference [topic] - Load specific reference documentation",
+    "/validate-flow [path] - Validate a Flow JSON file",
+    "/generate-flow [type] - Generate a basic flow template",
+    "/explain-component [name] - Explain a specific component with examples"
+  ],
+  "version_support": {
+    "minimum": "4.0",
+    "maximum": "7.1",
+    "recommended": "7.1"
+  },
+  "learning_outcomes": [
+    "Understand Flow JSON structure and core concepts",
+    "Create multi-screen conversational flows",
+    "Collect and validate user input",
+    "Implement conditional routing and branching",
+    "Integrate with backend servers and data endpoints",
+    "Use advanced features: expressions, global references, dynamic data",
+    "Handle sensitive data securely",
+    "Validate and deploy flows",
+    "Design user-friendly mobile experiences",
+    "Implement best practices and patterns"
+  ]
+}
