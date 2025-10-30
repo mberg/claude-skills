@@ -10,7 +10,11 @@ try:
     from pyxform import xls2json, create_survey_from_xls
     from pyxform.xls2json import get_xml
 except ImportError:
-    print("ERROR: pyxform not installed. Install with: pip install pyxform")
+    print("ERROR: pyxform not installed.")
+    print("\nInstall with uv:")
+    print("  uv pip install pyxform")
+    print("\nOr with pip:")
+    print("  pip install pyxform")
     sys.exit(1)
 
 

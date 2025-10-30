@@ -89,6 +89,40 @@ See [examples.md](examples.md) for 6 complete, working XLSForms:
 
 ## Common Tasks
 
+### Generate an XLSForm Excel file
+When asked to create an XLSForm, output a properly structured Excel file (.xlsx):
+
+**Required worksheets:**
+1. **survey** - Question definitions (type, name, label columns required)
+2. **choices** - Choice lists for select questions (list_name, name, label required)
+3. **settings** - Optional form metadata (form_title, form_id, version)
+
+**Format:**
+- Use clear tabular markdown showing each worksheet
+- Include all required columns (type, name, label)
+- Add optional columns as needed (hint, relevant, constraint, etc.)
+- Users can copy tables into Excel, or use `scripts/create_xlsform.py` to generate .xlsx from CSV
+
+**Example output structure:**
+```
+# survey worksheet
+| type | name | label | hint |
+|------|------|-------|------|
+| ... | ... | ... | ... |
+
+# choices worksheet
+| list_name | name | label |
+|-----------|------|-------|
+| ... | ... | ... |
+
+# settings worksheet (optional)
+| form_title | form_id | version |
+|------------|---------|---------|
+| ... | ... | ... |
+```
+
+See [creating-xlsforms.md](reference/creating-xlsforms.md) for detailed instructions on generating forms.
+
 ### Create a simple survey
 1. Read this quick start and the minimal example above
 2. Check [question-types.md](reference/question-types.md) for basic types

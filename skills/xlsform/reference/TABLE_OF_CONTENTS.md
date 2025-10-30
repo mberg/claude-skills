@@ -2,6 +2,9 @@
 
 ## By Topic
 
+### Getting Started
+- [creating-xlsforms.md](creating-xlsforms.md) - How to generate XLSForm Excel files
+
 ### Form Structure
 - [survey-sheet.md](survey-sheet.md) - Survey worksheet columns and structure
 - [choices-sheet.md](choices-sheet.md) - Choices worksheet for multiple-choice questions
@@ -38,10 +41,19 @@
 
 ## By Use Case
 
+### Generating an XLSForm
+**Goal:** Create an XLSForm Excel file from scratch or requirements
+
+1. Read: [creating-xlsforms.md](creating-xlsforms.md) - Learn file structure
+2. Plan: Identify questions, types, logic needed
+3. Create: Build survey and choices worksheets
+4. Generate: Use markdown tables or `create_xlsform.py` script
+5. Validate: Run `python scripts/validate_xlsform.py form.xlsx`
+
 ### Creating a Simple Survey
 **Goal:** Basic form with text, numbers, and multiple-choice questions
 
-1. Start: [survey-sheet.md](survey-sheet.md) - Understand required columns
+1. Start: [creating-xlsforms.md](creating-xlsforms.md) - Understand structure
 2. Learn types: [question-types.md](question-types.md) - Pick question types (text, integer, select_one)
 3. Add choices: [choices-sheet.md](choices-sheet.md) - Define answer options
 4. See example: Look at "Basic Survey" in examples.md

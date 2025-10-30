@@ -9,7 +9,11 @@ from pathlib import Path
 try:
     import openpyxl
 except ImportError:
-    print("ERROR: openpyxl not installed. Install with: pip install openpyxl")
+    print("ERROR: openpyxl not installed.")
+    print("\nInstall with uv:")
+    print("  uv pip install openpyxl")
+    print("\nOr with pip:")
+    print("  pip install openpyxl")
     sys.exit(1)
 
 
