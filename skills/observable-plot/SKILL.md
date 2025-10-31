@@ -154,6 +154,38 @@ Observable provides a collection of real-world datasets perfect for creating exa
 
 **See**: [reference/datasets.md](reference/datasets.md) for complete dataset catalog with direct URLs and usage examples.
 
+### Using Sample Datasets Correctly
+
+When creating visualizations with real data, **always use the curated datasets from `reference/datasets.md`**. Do not attempt to fetch arbitrary URLs or datasets from other sources.
+
+**Proper pattern for CSV files**:
+
+```javascript
+const data = await fetch(
+  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/athletes.csv"
+).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
+
+return Plot.plot({
+  marks: [
+    Plot.dot(data, {x: "weight", y: "height", fill: "sex"})
+  ]
+});
+```
+
+**Key points**:
+1. Use URLs from [reference/datasets.md](reference/datasets.md) - these are verified and reliable
+2. For CSV files: `fetch(url).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType))`
+3. For JSON files: `fetch(url).then(r => r.json())`
+4. Always use `d3.autoType` to automatically infer numeric and date types
+5. Check the dataset columns in datasets.md before writing your visualization code
+
+**Example datasets with common use cases**:
+- **athletes.csv** (Olympic athletes): Scatterplots, grouped analysis, distributions
+- **penguins.csv** (Penguin measurements): Species comparison, statistical analysis
+- **aapl.csv** (Apple stock): Time series, line charts, price trends
+- **cars.csv** (Automobile data): Correlation analysis, grouped comparisons
+- **diamonds.csv** (Diamond data): Price analysis, quality visualizations
+
 ## Common Tasks
 
 ### Creating Visualizations
