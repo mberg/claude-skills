@@ -11,6 +11,7 @@ import webbrowser
 import os
 import sys
 import argparse
+import json
 from pathlib import Path
 
 PORT = 8765
@@ -38,13 +39,30 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(b"// No code file found")
             except Exception as e:
                 self.wfile.write(f"// Error reading code: {e}".encode())
+        elif self.path == "/code-mtime":
+            # Return modification time of temp file
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
+            try:
+                if os.path.exists(TEMP_FILE):
+                    mtime = os.path.getmtime(TEMP_FILE)
+                    response = json.dumps({"mtime": mtime})
+                    self.wfile.write(response.encode())
+                else:
+                    self.wfile.write(json.dumps({"mtime": None}).encode())
+            except Exception as e:
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
         else:
             # Serve static files normally
             super().do_GET()
 
     def log_message(self, format, *args):
         """Custom logging"""
-        if self.path != "/code":  # Don't log code polling requests
+        # Don't log code polling requests
+        if self.path not in ["/code", "/code-mtime"]:
             print(f"[{self.address_string()}] {format % args}")
 
 

@@ -37,6 +37,7 @@ Comprehensive API reference:
 - **[Scales](reference/scales.md)** - Scale types and color schemes
 
 ### Specialized Topics
+- **[Datasets](reference/datasets.md)** - Sample datasets with direct URLs for examples
 - **[Projections](reference/projections.md)** - Geographic projection types
 - **[Faceting](reference/faceting.md)** - Small multiples configuration
 - **[Interactions](reference/interactions.md)** - Tooltips, crosshairs, and pointer interactions

@@ -122,8 +122,7 @@
     <div class="viewer-pane">
       <div class="toolbar">
         <span class="toolbar-title">Chart Preview</span>
-        <button class="toolbar-button" onclick="clearChart()">Clear</button>
-        <span class="status" id="viewer-status">Ready</span>
+        <span class="status" id="viewer-status" style="margin-left: auto;"></span>
       </div>
       <div id="error-container"></div>
       <div id="chart-container"></div>
@@ -134,32 +133,41 @@
     <div class="editor-pane">
       <div class="toolbar">
         <span class="toolbar-title">Code Editor</span>
-        <button class="toolbar-button" onclick="evaluateCode()">Run (⌘+Enter)</button>
-        <button class="toolbar-button" onclick="loadExample()">Load Example</button>
-        <button class="toolbar-button" onclick="loadFromTempFile()">Load Temp File</button>
+        <button class="toolbar-button" onclick="document.getElementById('file-input').click()">Load File</button>
+        <input type="file" id="file-input" accept=".json" style="display: none;" onchange="handleFileUpload(event)">
         <span class="status" id="editor-status"></span>
       </div>
       <div id="editor"></div>
     </div>
   </div>
 
+  <!-- D3 and Observable Plot (load before Monaco to avoid module conflicts) -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
   <!-- Monaco Editor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-
-  <!-- D3 and Observable Plot -->
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
 
   <script>
     let editor;
     let debounceTimeout;
+    let librariesReady = false;
+    let lastMtime = null;
+
+    // Load Observable Plot as ES module
+    import('https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm').then(PlotModule => {
+      window.Plot = PlotModule;
+      librariesReady = true;
+      console.log('Plot library loaded');
+    }).catch(err => {
+      console.error('Failed to load Plot:', err);
+    });
 
     // Initialize Monaco Editor
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
 
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('editor'), {
-        value: getDefaultCode(),
+        value: '// Loading code from temp file...',
         language: 'javascript',
         theme: 'vs-dark',
         fontSize: 13,
@@ -184,8 +192,23 @@
         evaluateCode();
       });
 
-      // Initial render
-      setTimeout(() => evaluateCode(), 100);
+      // Load temp file on startup
+      loadFromTempFile();
+
+      // Poll for temp file changes (now that loadFromTempFile is defined)
+      setInterval(async () => {
+        try {
+          const response = await fetch('/code-mtime');
+          const data = await response.json();
+          if (data.mtime && data.mtime !== lastMtime) {
+            lastMtime = data.mtime;
+            console.log('Temp file changed, reloading...');
+            loadFromTempFile();
+          }
+        } catch (err) {
+          console.error('Error polling for file changes:', err);
+        }
+      }, 1000);
     });
 
     function getDefaultCode() {
@@ -201,7 +224,7 @@ const data = [
   { x: 5, y: 6, category: "A" }
 ];
 
-Plot.plot({
+return Plot.plot({
   marks: [
     Plot.dot(data, {
       x: "x",
@@ -222,7 +245,7 @@ Plot.plot({
       updateStatus('viewer-status', 'Cleared', 'success');
     }
 
-    function evaluateCode() {
+    async function evaluateCode() {
       const code = editor.getValue();
       const chartContainer = document.getElementById('chart-container');
       const errorContainer = document.getElementById('error-container');
@@ -230,23 +253,33 @@ Plot.plot({
       // Clear previous content
       chartContainer.innerHTML = '';
       errorContainer.innerHTML = '';
-      updateStatus('editor-status', 'Evaluating...', '');
+
+      // Check if Plot and d3 are loaded
+      if (typeof window.d3 === 'undefined' || typeof window.Plot === 'undefined') {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-display';
+        const d3Status = typeof window.d3 === 'undefined' ? 'waiting' : 'loaded';
+        const plotStatus = typeof window.Plot === 'undefined' ? 'waiting' : 'loaded';
+        errorDiv.textContent = `Loading libraries... (d3: ${d3Status}, Plot: ${plotStatus})`;
+        errorContainer.appendChild(errorDiv);
+        setTimeout(() => evaluateCode(), 1000);
+        return;
+      }
 
       try {
-        // Create a function that returns the plot
-        const plotFunction = new Function('Plot', 'd3', `
-          return (${code});
-        `);
-
-        const result = plotFunction(Plot, d3);
+        // Create async function with Plot and d3 passed in
+        // Code should contain explicit "return" statement or end with an expression
+        const plotFunction = new Function('Plot', 'd3', `return (async () => { ${code} })()`);
+        const result = await plotFunction(window.Plot, window.d3);
 
         if (result && typeof result === 'object') {
           // If it's a Plot result, append it
           chartContainer.appendChild(result);
-          updateStatus('viewer-status', 'Rendered successfully', 'success');
-          updateStatus('editor-status', 'Success', 'success');
+          const now = new Date();
+          const timeString = now.toLocaleTimeString();
+          updateStatus('viewer-status', `Updated by Claude • ${timeString}`, '');
         } else {
-          throw new Error('Code must return a Plot.plot() result');
+          throw new Error('Code must return a Plot.plot() result. Use "return Plot.plot(...)" or ensure the last expression is a plot.');
         }
       } catch (error) {
         const errorDiv = document.createElement('div');
@@ -254,8 +287,7 @@ Plot.plot({
         errorDiv.textContent = `Error: ${error.message}\n${error.stack || ''}`;
         errorContainer.appendChild(errorDiv);
 
-        updateStatus('viewer-status', 'Render failed', 'error');
-        updateStatus('editor-status', error.message, 'error');
+        updateStatus('viewer-status', '', '');
       }
     }
 
@@ -283,6 +315,29 @@ Plot.plot({
       } catch (error) {
         updateStatus('editor-status', `Error: ${error.message}`, 'error');
       }
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);
+          const code = json.code || JSON.stringify(json, null, 2);
+          editor.setValue(code);
+          evaluateCode();
+        } catch (error) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'error-display';
+          errorDiv.textContent = `Error parsing JSON: ${error.message}`;
+          document.getElementById('error-container').appendChild(errorDiv);
+        }
+      };
+      reader.readAsText(file);
+      // Reset file input so same file can be loaded again
+      event.target.value = '';
     }
 
     function loadExample() {

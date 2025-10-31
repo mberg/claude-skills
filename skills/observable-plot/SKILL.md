@@ -96,48 +96,9 @@ document.body.appendChild(plot);
 
 ## Sample Datasets
 
-Observable provides a collection of real-world datasets perfect for creating example visualizations:
+Observable provides a collection of real-world datasets perfect for creating example visualizations. These include datasets for time series (stock prices, weather, temperature), categorical data (letters, athletes, cars), and geographic data (US counties, state capitals).
 
-**Repository**: https://github.com/observablehq/sample-datasets
-
-Available datasets include:
-- **aapl.csv** - Apple stock prices (time series)
-- **alphabet.csv** - Alphabet/letter frequency data
-- **athletes.csv** - Olympic athletes data
-- **cars.csv** - Automobile characteristics and performance
-- **diamonds.csv** - Diamond pricing and characteristics
-- **flare.csv** - Software dependency hierarchy
-- **gistemp.csv** - Global temperature data (climate)
-- **industries.csv** - Industry sector data
-- **penguins.csv** - Palmer Penguins morphological data
-- **seattle-weather.csv** - Daily weather observations
-- **us-county-unemployment.csv** - US unemployment by county
-- **us-state-capitals.json** - US state capitals with coordinates
-- **world-population.csv** - Historical population data
-
-### Using Sample Datasets
-
-Load datasets via URL:
-
-```javascript
-const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/main/penguins.csv"
-).then(response => response.text())
-  .then(text => d3.csvParse(text, d3.autoType));
-
-Plot.plot({
-  marks: [
-    Plot.dot(data, {
-      x: "flipper_length_mm",
-      y: "body_mass_g",
-      fill: "species",
-      tip: true
-    })
-  ]
-})
-```
-
-**Note**: Use `d3.csvParse()` with `d3.autoType` for automatic type inference, or `d3.jsonParse()` for JSON data.
+**See**: [reference/datasets.md](reference/datasets.md) for complete dataset catalog with direct URLs and usage examples.
 
 ## Common Tasks
 

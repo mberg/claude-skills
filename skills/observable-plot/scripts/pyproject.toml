@@ -13,5 +13,8 @@ plot-viewer = "plot_viewer.server:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["plot_viewer"]
+
 [tool.uv]
 dev-dependencies = []
