@@ -158,11 +158,23 @@ Observable provides a collection of real-world datasets perfect for creating exa
 
 When creating visualizations with real data, **always use the curated datasets from `reference/datasets.md`**. Do not attempt to fetch arbitrary URLs or datasets from other sources.
 
+**Before creating a visualization with external data, verify the data structure**:
+
+```bash
+curl -s "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/olympians.csv" | head -20
+```
+
+This shows you:
+- The actual column names (critical for writing correct Plot code)
+- Data types and formats
+- Whether the data loads successfully
+- Sample values to understand the data
+
 **Proper pattern for CSV files**:
 
 ```javascript
 const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/athletes.csv"
+  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/olympians.csv"
 ).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
 
 return Plot.plot({
@@ -174,13 +186,14 @@ return Plot.plot({
 
 **Key points**:
 1. Use URLs from [reference/datasets.md](reference/datasets.md) - these are verified and reliable
-2. For CSV files: `fetch(url).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType))`
-3. For JSON files: `fetch(url).then(r => r.json())`
-4. Always use `d3.autoType` to automatically infer numeric and date types
-5. Check the dataset columns in datasets.md before writing your visualization code
+2. **Always verify external data with `curl | head -20` before creating the plot**
+3. For CSV files: `fetch(url).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType))`
+4. For JSON files: `fetch(url).then(r => r.json())`
+5. Always use `d3.autoType` to automatically infer numeric and date types
+6. Check the dataset columns in datasets.md before writing your visualization code
 
 **Example datasets with common use cases**:
-- **athletes.csv** (Olympic athletes): Scatterplots, grouped analysis, distributions
+- **olympians.csv** (Olympic athletes): Scatterplots, grouped analysis, distributions
 - **penguins.csv** (Penguin measurements): Species comparison, statistical analysis
 - **aapl.csv** (Apple stock): Time series, line charts, price trends
 - **cars.csv** (Automobile data): Correlation analysis, grouped comparisons
