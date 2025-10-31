@@ -56,28 +56,13 @@ Plot.plot({
 
 ---
 
-### Olympic Athletes (athletes.csv)
+### City Wages (citywages.csv)
 
-**Description**: Olympic athletes with physical characteristics and sports.
+**Description**: Wage data across different cities.
 
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/athletes.csv
+**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/citywages.csv
 
-**Columns**: `name`, `nationality`, `sex`, `height`, `weight`, `sport`, `gold`, `silver`, `bronze`
-
-**Use cases**: Scatterplots, grouped visualizations, distribution analysis
-
-**Example**:
-```javascript
-const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/athletes.csv"
-).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
-
-Plot.plot({
-  marks: [
-    Plot.dot(data, {x: "weight", y: "height", fill: "sex", tip: true})
-  ]
-})
-```
+**Use cases**: Comparative analysis, city-level wage visualizations
 
 ---
 
@@ -148,31 +133,6 @@ Plot.plot({
 
 ---
 
-### Global Temperature (gistemp.csv)
-
-**Description**: Global surface temperature anomalies from NASA GISS.
-
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/gistemp.csv
-
-**Columns**: `Date`, `Anomaly`
-
-**Use cases**: Climate visualization, time series, trend analysis
-
-**Example**:
-```javascript
-const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/gistemp.csv"
-).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
-
-Plot.plot({
-  marks: [
-    Plot.lineY(data, {x: "Date", y: "Anomaly", stroke: "red"}),
-    Plot.ruleY([0])
-  ]
-})
-```
-
----
 
 ### Industry Sectors (industries.csv)
 
@@ -183,6 +143,16 @@ Plot.plot({
 **Columns**: `industry`, `employees`, `wages`
 
 **Use cases**: Bar charts, comparisons, economic analysis
+
+---
+
+### Olympians (olympians.csv)
+
+**Description**: Olympic athletes with physical characteristics and sports.
+
+**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/olympians.csv
+
+**Use cases**: Scatterplots, grouped visualizations, distribution analysis
 
 ---
 
@@ -217,129 +187,33 @@ Plot.plot({
 
 ---
 
-### Seattle Weather (seattle-weather.csv)
+### Pizza (pizza.csv)
 
-**Description**: Daily weather observations from Seattle including temperature and precipitation.
+**Description**: Pizza restaurant data and ratings.
 
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/seattle-weather.csv
+**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/pizza.csv
 
-**Columns**: `date`, `precipitation`, `temp_max`, `temp_min`, `wind`, `weather`
-
-**Use cases**: Time series, weather patterns, seasonal analysis, heatmaps
-
-**Example**:
-```javascript
-const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/seattle-weather.csv"
-).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
-
-Plot.plot({
-  marks: [
-    Plot.lineY(data, {x: "date", y: "temp_max", stroke: "red"}),
-    Plot.lineY(data, {x: "date", y: "temp_min", stroke: "blue"})
-  ]
-})
-```
+**Use cases**: Comparisons, ratings analysis, categorical visualization
 
 ---
 
-### US County Unemployment (us-county-unemployment.csv)
+### Weather (weather.csv)
 
-**Description**: Unemployment rates by US county.
+**Description**: Weather observations including temperature and precipitation.
 
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/us-county-unemployment.csv
+**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/weather.csv
 
-**Columns**: `id`, `rate`
-
-**Use cases**: Choropleth maps, geographic visualization, county-level analysis
-
-**Example** (requires GeoJSON):
-```javascript
-const unemployment = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/us-county-unemployment.csv"
-).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
-
-const counties = await fetch("us-counties.json").then(r => r.json());
-
-const unemploymentById = new Map(unemployment.map(d => [d.id, d.rate]));
-
-Plot.plot({
-  projection: "albers-usa",
-  color: {scheme: "YlOrRd", legend: true},
-  marks: [
-    Plot.geo(counties, {
-      fill: d => unemploymentById.get(d.id),
-      stroke: "white",
-      strokeWidth: 0.25
-    })
-  ]
-})
-```
+**Use cases**: Time series, weather patterns, seasonal analysis
 
 ---
 
-### US State Capitals (us-state-capitals.json)
+### Miserables (miserables.json)
 
-**Description**: US state capitals with names and coordinates.
+**Description**: Character relationship data from Les Misérables.
 
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/us-state-capitals.json
+**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/miserables.json
 
-**Columns**: `name`, `lat`, `lon`, `description`
-
-**Use cases**: Geographic visualization, point maps, labeled maps
-
-**Example**:
-```javascript
-const capitals = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/us-state-capitals.json"
-).then(r => r.json());
-
-Plot.plot({
-  projection: "albers-usa",
-  marks: [
-    Plot.dot(capitals, {
-      x: "lon",
-      y: "lat",
-      r: 5,
-      fill: "steelblue",
-      tip: true
-    }),
-    Plot.text(capitals, {
-      x: "lon",
-      y: "lat",
-      text: "description",
-      dy: -10,
-      fontSize: 8
-    })
-  ]
-})
-```
-
----
-
-### World Population (world-population.csv)
-
-**Description**: Historical world population data.
-
-**URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/world-population.csv
-
-**Columns**: `year`, `population`
-
-**Use cases**: Time series, historical trends, population growth visualization
-
-**Example**:
-```javascript
-const data = await fetch(
-  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/world-population.csv"
-).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
-
-Plot.plot({
-  marks: [
-    Plot.lineY(data, {x: "year", y: "population", stroke: "steelblue"}),
-    Plot.dot(data, {x: "year", y: "population", fill: "steelblue"})
-  ]
-})
-```
+**Use cases**: Network diagrams, relationship visualization, force-directed graphs
 
 ---
 
