@@ -227,11 +227,45 @@ Users can then:
 - **Live Preview**: Chart updates as you type (500ms debounce)
 - **Monaco Editor**: Full-featured code editor with syntax highlighting
 - **File Switching**: Click any plot in history to load it instantly
-- **Auto-reload**: Detects new plots automatically (polls every 5 seconds)
+- **Auto-reload**: Detects new plots and file changes automatically (polls every 2 seconds)
 - **Resizable Panes**: Drag divider to adjust layout
 - **Error Display**: See error messages clearly when code fails
 - **Keyboard Shortcut**: ⌘+Enter to manually run code
 - **Persistent Storage**: All plots saved in `plots/` directory for future use
+- **Error Tracking**: Errors are automatically sent to server for debugging
+
+### Debugging with Claude
+
+When running the viewer in the background, Claude can check for errors:
+
+```bash
+curl -s http://localhost:8765/viewer-status | jq
+```
+
+This returns:
+```json
+{
+  "last_error": "Plot evaluation error: data is not defined",
+  "last_error_time": "2025-10-31T14:23:45.123Z",
+  "error_count": 3,
+  "recent_errors": [
+    {
+      "message": "Plot evaluation error: data is not defined",
+      "stack": "ReferenceError: data is not defined...",
+      "timestamp": "2025-10-31T14:23:45.123Z"
+    }
+  ],
+  "plots_dir": "/Users/mberg/projects/myapp/plots",
+  "plots_dir_exists": true,
+  "server_time": "2025-10-31T14:25:00.000Z"
+}
+```
+
+This allows Claude to:
+- See what errors occurred in the viewer
+- Check if the plots directory exists
+- Verify the server is watching the right directory
+- Help troubleshoot plot code issues
 
 ### Code Requirements
 

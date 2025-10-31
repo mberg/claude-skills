@@ -28,6 +28,14 @@ PORT = 8765
 PLOTS_DIR = (Path.cwd() / "plots").absolute()
 CURRENT_PLOT_FILE = PLOTS_DIR / ".current-plot.json"
 
+# Track viewer state and errors for debugging
+VIEWER_STATE = {
+    "last_error": None,
+    "last_error_time": None,
+    "error_count": 0,
+    "recent_errors": []  # Keep last 10 errors
+}
+
 
 def ensure_plots_dir():
     """Ensure plots directory exists"""
@@ -37,6 +45,43 @@ def ensure_plots_dir():
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     """Custom handler to serve the viewer and plot files"""
+
+    def do_POST(self):
+        """Handle POST requests"""
+        if self.path == "/error":
+            # Receive error reports from the viewer
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(content_length)
+                error_data = json.loads(body.decode('utf-8'))
+
+                # Update viewer state
+                VIEWER_STATE["last_error"] = error_data.get("message", "Unknown error")
+                VIEWER_STATE["last_error_time"] = datetime.now().isoformat()
+                VIEWER_STATE["error_count"] += 1
+
+                # Add to recent errors (keep last 10)
+                VIEWER_STATE["recent_errors"].append({
+                    "message": error_data.get("message", "Unknown error"),
+                    "stack": error_data.get("stack", ""),
+                    "timestamp": VIEWER_STATE["last_error_time"]
+                })
+                if len(VIEWER_STATE["recent_errors"]) > 10:
+                    VIEWER_STATE["recent_errors"].pop(0)
+
+                print(f"[ERROR] {error_data.get('message', 'Unknown error')}")
+
+                self.wfile.write(json.dumps({"status": "ok"}).encode())
+            except Exception as e:
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
 
     def do_GET(self):
         """Handle GET requests"""
@@ -138,6 +183,24 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
 
+        elif self.path == "/viewer-status":
+            # Return viewer state and errors for debugging
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
+            try:
+                status = {
+                    **VIEWER_STATE,
+                    "plots_dir": str(PLOTS_DIR.absolute()) if PLOTS_DIR else None,
+                    "plots_dir_exists": PLOTS_DIR.exists() if PLOTS_DIR else False,
+                    "server_time": datetime.now().isoformat()
+                }
+                self.wfile.write(json.dumps(status, indent=2).encode())
+            except Exception as e:
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+
         elif self.path.startswith("/plot/"):
             # Load a specific plot file
             filename = self.path[6:]  # Remove "/plot/" prefix
@@ -169,7 +232,8 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         """Custom logging"""
         # Don't log code polling or plots listing requests
-        if self.path not in ["/code", "/code-mtime", "/plots", "/plots-dir"] and not self.path.startswith("/plot/"):
+        quiet_paths = ["/code", "/code-mtime", "/plots", "/plots-dir", "/viewer-status", "/error"]
+        if self.path not in quiet_paths and not self.path.startswith("/plot/"):
             print(f"[{self.address_string()}] {format % args}")
 
 

@@ -269,6 +269,29 @@
     let librariesReady = false;
     let lastMtime = null;
     let currentPlotFilename = null;
+    let plotMtimes = new Map(); // Track modification times of all plot files
+
+    // Send errors to server for debugging
+    function reportError(message, stack = '') {
+      try {
+        fetch('/error', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, stack })
+        }).catch(err => console.error('Failed to report error:', err));
+      } catch (e) {
+        console.error('Error reporting failed:', e);
+      }
+    }
+
+    // Catch global errors
+    window.addEventListener('error', (event) => {
+      reportError(event.message, event.error?.stack || '');
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      reportError(`Unhandled promise rejection: ${event.reason}`, event.reason?.stack || '');
+    });
 
     // Load Observable Plot as ES module
     import('https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm').then(PlotModule => {
@@ -333,8 +356,8 @@
         }
       }, 1000);
 
-      // Poll for history updates less frequently
-      setInterval(loadPlotHistory, 5000);
+      // Poll for history updates to detect file changes
+      setInterval(loadPlotHistory, 2000);
     });
 
     function getDefaultCode() {
@@ -414,6 +437,9 @@ return Plot.plot({
         errorContainer.appendChild(errorDiv);
 
         updateStatus('viewer-status', '', '');
+
+        // Report error to server for debugging
+        reportError(`Plot evaluation error: ${error.message}`, error.stack || '');
       }
     }
 
@@ -511,6 +537,24 @@ return Plot.plot({
         const historyList = document.getElementById('history-list');
         const fileCountElement = document.getElementById('file-count');
 
+        // Check if current file was modified
+        if (currentPlotFilename) {
+          const currentPlot = plots.find(p => p.filename === currentPlotFilename);
+          if (currentPlot) {
+            const oldMtime = plotMtimes.get(currentPlotFilename);
+            if (oldMtime && currentPlot.mtime !== oldMtime) {
+              console.log('Current plot file changed, reloading:', currentPlotFilename);
+              // Reload the plot automatically
+              loadPlot(currentPlotFilename, true);
+            }
+          }
+        }
+
+        // Update mtime tracking
+        plots.forEach(plot => {
+          plotMtimes.set(plot.filename, plot.mtime);
+        });
+
         // Update file count
         if (plots && plots.length > 0) {
           fileCountElement.textContent = `${plots.length} file${plots.length !== 1 ? 's' : ''} found`;
@@ -520,6 +564,7 @@ return Plot.plot({
 
         if (!plots || plots.length === 0) {
           historyList.innerHTML = '<div class="history-empty">No plots yet</div>';
+          plotMtimes.clear();
           return;
         }
 
@@ -559,9 +604,11 @@ return Plot.plot({
       }
     }
 
-    async function loadPlot(filename) {
+    async function loadPlot(filename, isAutoReload = false) {
       try {
-        updateStatus('editor-status', 'Loading plot...', '');
+        if (!isAutoReload) {
+          updateStatus('editor-status', 'Loading plot...', '');
+        }
         const response = await fetch(`/plot/${filename}`);
         if (!response.ok) {
           throw new Error('Failed to load plot');
@@ -575,10 +622,14 @@ return Plot.plot({
         currentPlotFilename = filename;
         editor.setValue(data.code || '');
         evaluateCode();
-        updateStatus('editor-status', `Loaded: ${data.name || filename}`, 'success');
 
-        // Update active state in history
-        loadPlotHistory();
+        if (isAutoReload) {
+          updateStatus('editor-status', `Auto-reloaded: ${data.name || filename}`, 'success');
+        } else {
+          updateStatus('editor-status', `Loaded: ${data.name || filename}`, 'success');
+          // Only refresh history list if this was a manual load (avoid infinite loop)
+          loadPlotHistory();
+        }
       } catch (error) {
         updateStatus('editor-status', `Error: ${error.message}`, 'error');
       }
