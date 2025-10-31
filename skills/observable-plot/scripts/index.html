@@ -620,14 +620,26 @@ return Plot.plot({
         }
 
         currentPlotFilename = filename;
-        editor.setValue(data.code || '');
-        evaluateCode();
+        const newCode = data.code || '';
+        const currentCode = editor.getValue();
 
-        if (isAutoReload) {
-          updateStatus('editor-status', `Auto-reloaded: ${data.name || filename}`, 'success');
-        } else {
+        // Only update editor and evaluate if code actually changed
+        if (newCode !== currentCode) {
+          editor.setValue(newCode);
+          evaluateCode();
+
+          if (isAutoReload) {
+            updateStatus('editor-status', `Auto-reloaded: ${data.name || filename}`, 'success');
+          } else {
+            updateStatus('editor-status', `Loaded: ${data.name || filename}`, 'success');
+          }
+        } else if (!isAutoReload) {
+          // Manual load but code is same - still update status
           updateStatus('editor-status', `Loaded: ${data.name || filename}`, 'success');
-          // Only refresh history list if this was a manual load (avoid infinite loop)
+        }
+
+        // Only refresh history list if this was a manual load (avoid infinite loop)
+        if (!isAutoReload) {
           loadPlotHistory();
         }
       } catch (error) {
