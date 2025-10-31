@@ -94,6 +94,60 @@ const plot = Plot.plot({
 document.body.appendChild(plot);
 ```
 
+## Interactive Viewer
+
+The Observable Plot skill includes an interactive live editor and viewer for developing visualizations:
+
+### Starting the Viewer
+
+```bash
+cd skills/observable-plot/scripts
+uv run plot-viewer
+```
+
+This launches a split-pane editor with live preview on http://localhost:8765
+
+**Options:**
+- `--port 8080` - Use a different port
+- `--no-browser` - Don't auto-open browser
+- `--create-example` - Create example temp file on startup
+
+### Using with Claude
+
+Claude can write visualization code that automatically loads in the viewer:
+
+1. Claude writes code to `/tmp/observable-plot-code.js`
+2. Open the viewer: `uv run plot-viewer`
+3. Click "Load Temp File" to see the visualization
+4. Edit code and see live updates as you type
+
+**Example workflow:**
+```javascript
+// Claude writes this to /tmp/observable-plot-code.js
+const data = [
+  {category: "A", value: 10},
+  {category: "B", value: 20},
+  {category: "C", value: 15}
+];
+
+return Plot.plot({
+  marks: [
+    Plot.barY(data, {x: "category", y: "value"})
+  ]
+})
+```
+
+The code must return a `Plot.plot()` result using `return` and has access to `Plot` and `d3` globals. Click "Load Temp File" in the viewer to render it.
+
+### Viewer Features
+
+- **Live Preview**: Chart updates as you type (500ms debounce)
+- **Monaco Editor**: Full-featured code editor with syntax highlighting
+- **Built-in Examples**: Load sample charts with one click
+- **Resizable Panes**: Drag divider to adjust layout
+- **Error Display**: See error messages clearly when code fails
+- **Keyboard Shortcut**: ⌘+Enter to manually run code
+
 ## Sample Datasets
 
 Observable provides a collection of real-world datasets perfect for creating example visualizations. These include datasets for time series (stock prices, weather, temperature), categorical data (letters, athletes, cars), and geographic data (US counties, state capitals).
