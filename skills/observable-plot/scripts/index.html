@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observable Plot Viewer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: #1e1e1e;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .viewer-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      overflow: auto;
+    }
+
+    .editor-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-left: 2px solid #333;
+    }
+
+    .toolbar {
+      background: #2d2d30;
+      color: #cccccc;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #3e3e42;
+    }
+
+    .toolbar-title {
+      font-weight: 600;
+    }
+
+    .toolbar-button {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .toolbar-button:hover {
+      background: #1177bb;
+    }
+
+    .status {
+      margin-left: auto;
+      font-size: 11px;
+      color: #858585;
+    }
+
+    .status.error {
+      color: #f48771;
+    }
+
+    .status.success {
+      color: #89d185;
+    }
+
+    #chart-container {
+      flex: 1;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    #editor {
+      flex: 1;
+      height: 100%;
+    }
+
+    .error-display {
+      background: #5a1d1d;
+      color: #f48771;
+      padding: 12px 16px;
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow-y: auto;
+      border-bottom: 1px solid #8b0000;
+    }
+
+    .resizer {
+      width: 4px;
+      background: #333;
+      cursor: col-resize;
+      transition: background 0.2s;
+    }
+
+    .resizer:hover {
+      background: #0e639c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="viewer-pane">
+      <div class="toolbar">
+        <span class="toolbar-title">Chart Preview</span>
+        <button class="toolbar-button" onclick="clearChart()">Clear</button>
+        <span class="status" id="viewer-status">Ready</span>
+      </div>
+      <div id="error-container"></div>
+      <div id="chart-container"></div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <div class="editor-pane">
+      <div class="toolbar">
+        <span class="toolbar-title">Code Editor</span>
+        <button class="toolbar-button" onclick="evaluateCode()">Run (⌘+Enter)</button>
+        <button class="toolbar-button" onclick="loadExample()">Load Example</button>
+        <button class="toolbar-button" onclick="loadFromTempFile()">Load Temp File</button>
+        <span class="status" id="editor-status"></span>
+      </div>
+      <div id="editor"></div>
+    </div>
+  </div>
+
+  <!-- Monaco Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <!-- D3 and Observable Plot -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
+
+  <script>
+    let editor;
+    let debounceTimeout;
+
+    // Initialize Monaco Editor
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+    require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        value: getDefaultCode(),
+        language: 'javascript',
+        theme: 'vs-dark',
+        fontSize: 13,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        tabSize: 2,
+        wordWrap: 'on'
+      });
+
+      // Auto-evaluate on change with debouncing
+      editor.onDidChangeModelContent(() => {
+        clearTimeout(debounceTimeout);
+        document.getElementById('editor-status').textContent = 'Editing...';
+        debounceTimeout = setTimeout(() => {
+          evaluateCode();
+        }, 500);
+      });
+
+      // Keyboard shortcuts
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+        evaluateCode();
+      });
+
+      // Initial render
+      setTimeout(() => evaluateCode(), 100);
+    });
+
+    function getDefaultCode() {
+      return `// Observable Plot Example
+// Available: Plot, d3
+// The plot will be automatically displayed
+
+const data = [
+  { x: 1, y: 2, category: "A" },
+  { x: 2, y: 5, category: "B" },
+  { x: 3, y: 3, category: "A" },
+  { x: 4, y: 8, category: "B" },
+  { x: 5, y: 6, category: "A" }
+];
+
+Plot.plot({
+  marks: [
+    Plot.dot(data, {
+      x: "x",
+      y: "y",
+      fill: "category",
+      r: 8,
+      tip: true
+    }),
+    Plot.ruleY([0])
+  ],
+  color: { legend: true }
+})`;
+    }
+
+    function clearChart() {
+      document.getElementById('chart-container').innerHTML = '';
+      document.getElementById('error-container').innerHTML = '';
+      updateStatus('viewer-status', 'Cleared', 'success');
+    }
+
+    function evaluateCode() {
+      const code = editor.getValue();
+      const chartContainer = document.getElementById('chart-container');
+      const errorContainer = document.getElementById('error-container');
+
+      // Clear previous content
+      chartContainer.innerHTML = '';
+      errorContainer.innerHTML = '';
+      updateStatus('editor-status', 'Evaluating...', '');
+
+      try {
+        // Create a function that returns the plot
+        const plotFunction = new Function('Plot', 'd3', `
+          return (${code});
+        `);
+
+        const result = plotFunction(Plot, d3);
+
+        if (result && typeof result === 'object') {
+          // If it's a Plot result, append it
+          chartContainer.appendChild(result);
+          updateStatus('viewer-status', 'Rendered successfully', 'success');
+          updateStatus('editor-status', 'Success', 'success');
+        } else {
+          throw new Error('Code must return a Plot.plot() result');
+        }
+      } catch (error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-display';
+        errorDiv.textContent = `Error: ${error.message}\n${error.stack || ''}`;
+        errorContainer.appendChild(errorDiv);
+
+        updateStatus('viewer-status', 'Render failed', 'error');
+        updateStatus('editor-status', error.message, 'error');
+      }
+    }
+
+    function updateStatus(elementId, message, status) {
+      const element = document.getElementById(elementId);
+      element.textContent = message;
+      element.className = 'status ' + status;
+    }
+
+    async function loadFromTempFile() {
+      try {
+        updateStatus('editor-status', 'Loading temp file...', '');
+        const response = await fetch('/code');
+        if (!response.ok) {
+          throw new Error('Failed to load temp file');
+        }
+        const code = await response.text();
+        if (code && code.trim() && !code.startsWith('// No code file')) {
+          editor.setValue(code);
+          evaluateCode();
+          updateStatus('editor-status', 'Loaded from temp file', 'success');
+        } else {
+          updateStatus('editor-status', 'No code in temp file', 'error');
+        }
+      } catch (error) {
+        updateStatus('editor-status', `Error: ${error.message}`, 'error');
+      }
+    }
+
+    function loadExample() {
+      const examples = [
+        {
+          name: "Scatterplot with Regression",
+          code: `// Scatterplot with Linear Regression
+const data = Array.from({length: 50}, () => ({
+  x: Math.random() * 100,
+  y: 20 + Math.random() * 60 + Math.random() * 20
+}));
+
+Plot.plot({
+  marks: [
+    Plot.dot(data, {
+      x: "x",
+      y: "y",
+      fill: "steelblue",
+      r: 4
+    }),
+    Plot.linearRegressionY(data, {
+      x: "x",
+      y: "y",
+      stroke: "red",
+      strokeWidth: 2
+    }),
+    Plot.ruleY([0])
+  ],
+  grid: true
+})`
+        },
+        {
+          name: "Stacked Bar Chart",
+          code: `// Stacked Bar Chart
+const data = [
+  {quarter: "Q1", product: "A", revenue: 100},
+  {quarter: "Q1", product: "B", revenue: 80},
+  {quarter: "Q2", product: "A", revenue: 120},
+  {quarter: "Q2", product: "B", revenue: 95},
+  {quarter: "Q3", product: "A", revenue: 110},
+  {quarter: "Q3", product: "B", revenue: 105},
+  {quarter: "Q4", product: "A", revenue: 140},
+  {quarter: "Q4", product: "B", revenue: 115}
+];
+
+Plot.plot({
+  marks: [
+    Plot.barY(data, Plot.stackY({
+      x: "quarter",
+      y: "revenue",
+      fill: "product"
+    })),
+    Plot.ruleY([0])
+  ],
+  color: { legend: true }
+})`
+        },
+        {
+          name: "Hexbin Heatmap",
+          code: `// Hexbin Heatmap
+const data = Array.from({length: 2000}, () => ({
+  x: Math.random() * 100,
+  y: Math.random() * 100
+}));
+
+Plot.plot({
+  color: {
+    scheme: "YlOrRd",
+    legend: true,
+    label: "Density"
+  },
+  marks: [
+    Plot.dot(data, Plot.hexbin(
+      {fill: "count"},
+      {
+        x: "x",
+        y: "y",
+        binWidth: 8,
+        r: 6,
+        stroke: "white",
+        strokeWidth: 0.5
+      }
+    ))
+  ]
+})`
+        }
+      ];
+
+      const example = examples[Math.floor(Math.random() * examples.length)];
+      editor.setValue(example.code);
+      evaluateCode();
+    }
+
+    // Resizer functionality
+    const resizer = document.getElementById('resizer');
+    const viewerPane = document.querySelector('.viewer-pane');
+    const editorPane = document.querySelector('.editor-pane');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+
+      const containerWidth = document.querySelector('.container').offsetWidth;
+      const viewerWidth = (e.clientX / containerWidth) * 100;
+
+      if (viewerWidth > 20 && viewerWidth < 80) {
+        viewerPane.style.flex = `0 0 ${viewerWidth}%`;
+        editorPane.style.flex = `0 0 ${100 - viewerWidth}%`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = 'default';
+      }
+    });
+  </script>
+</body>
+</html>

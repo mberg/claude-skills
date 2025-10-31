@@ -1,0 +1,17 @@
+[project]
+name = "observable-plot-viewer"
+version = "0.1.0"
+description = "Live code editor and preview tool for Observable Plot visualizations"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+plot-viewer = "plot_viewer.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
