@@ -24,6 +24,15 @@
       width: 100vw;
     }
 
+    .history-pane {
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      background: #252526;
+      border-right: 2px solid #333;
+      overflow: hidden;
+    }
+
     .viewer-pane {
       flex: 1;
       display: flex;
@@ -37,6 +46,101 @@
       display: flex;
       flex-direction: column;
       border-left: 2px solid #333;
+    }
+
+    .history-header {
+      background: #2d2d30;
+      color: #cccccc;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid #3e3e42;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .history-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .history-item:hover {
+      background: #2a2d2e;
+      border-left-color: #0e639c;
+    }
+
+    .history-item.active {
+      background: #37373d;
+      border-left-color: #0e639c;
+    }
+
+    .history-item-name {
+      color: #cccccc;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-desc {
+      color: #858585;
+      font-size: 11px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-time {
+      color: #6a6a6a;
+      font-size: 10px;
+    }
+
+    .history-empty {
+      color: #858585;
+      font-size: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .plots-dir-info {
+      background: #1e1e1e;
+      padding: 12px 16px;
+      border-bottom: 1px solid #3e3e42;
+      font-size: 11px;
+      color: #858585;
+    }
+
+    .plots-dir-label {
+      color: #6a6a6a;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+
+    .plots-dir-path {
+      color: #cccccc;
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .plots-dir-error {
+      color: #f48771;
+      margin-top: 4px;
+    }
+
+    .file-count {
+      color: #4a9eff;
+      margin-top: 8px;
     }
 
     .toolbar {
@@ -119,6 +223,18 @@
 </head>
 <body>
   <div class="container">
+    <div class="history-pane">
+      <div class="history-header">Plot History</div>
+      <div class="plots-dir-info" id="plots-dir-info">
+        <div class="plots-dir-label">Plots Directory</div>
+        <div class="plots-dir-path" id="plots-dir-path">Loading...</div>
+        <div class="file-count" id="file-count"></div>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="history-empty">No plots yet</div>
+      </div>
+    </div>
+
     <div class="viewer-pane">
       <div class="toolbar">
         <span class="toolbar-title">Chart Preview</span>
@@ -152,6 +268,7 @@
     let debounceTimeout;
     let librariesReady = false;
     let lastMtime = null;
+    let currentPlotFilename = null;
 
     // Load Observable Plot as ES module
     import('https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm').then(PlotModule => {
@@ -195,20 +312,29 @@
       // Load temp file on startup
       loadFromTempFile();
 
-      // Poll for temp file changes (now that loadFromTempFile is defined)
+      // Load plots directory info
+      loadPlotsDirectory();
+
+      // Load plot history
+      loadPlotHistory();
+
+      // Poll for temp file changes and history updates
       setInterval(async () => {
         try {
           const response = await fetch('/code-mtime');
           const data = await response.json();
           if (data.mtime && data.mtime !== lastMtime) {
             lastMtime = data.mtime;
-            console.log('Temp file changed, reloading...');
+            console.log('Current plot changed, reloading...');
             loadFromTempFile();
           }
         } catch (err) {
           console.error('Error polling for file changes:', err);
         }
       }, 1000);
+
+      // Poll for history updates less frequently
+      setInterval(loadPlotHistory, 5000);
     });
 
     function getDefaultCode() {
@@ -338,6 +464,124 @@ return Plot.plot({
       reader.readAsText(file);
       // Reset file input so same file can be loaded again
       event.target.value = '';
+    }
+
+    async function loadPlotsDirectory() {
+      try {
+        console.log('Fetching plots directory info...');
+        const response = await fetch('/plots-dir');
+        if (!response.ok) {
+          console.error('Failed to fetch plots-dir:', response.status);
+          return;
+        }
+
+        const data = await response.json();
+        console.log('Plots directory data:', data);
+        const pathElement = document.getElementById('plots-dir-path');
+        const fileCountElement = document.getElementById('file-count');
+
+        if (data.error) {
+          pathElement.innerHTML = `<div class="plots-dir-error">Error: ${data.error}</div>`;
+          return;
+        }
+
+        pathElement.textContent = data.plots_dir || 'Unknown';
+
+        if (!data.exists) {
+          pathElement.innerHTML += '<div class="plots-dir-error">⚠ Directory does not exist</div>';
+        }
+      } catch (error) {
+        console.error('Error loading plots directory:', error);
+        document.getElementById('plots-dir-path').innerHTML =
+          '<div class="plots-dir-error">Error loading directory info</div>';
+      }
+    }
+
+    async function loadPlotHistory() {
+      try {
+        console.log('Fetching plot history...');
+        const response = await fetch('/plots');
+        if (!response.ok) {
+          console.error('Failed to fetch plots:', response.status);
+          return;
+        }
+
+        const plots = await response.json();
+        console.log('Plots data:', plots);
+        const historyList = document.getElementById('history-list');
+        const fileCountElement = document.getElementById('file-count');
+
+        // Update file count
+        if (plots && plots.length > 0) {
+          fileCountElement.textContent = `${plots.length} file${plots.length !== 1 ? 's' : ''} found`;
+        } else {
+          fileCountElement.textContent = '0 files found';
+        }
+
+        if (!plots || plots.length === 0) {
+          historyList.innerHTML = '<div class="history-empty">No plots yet</div>';
+          return;
+        }
+
+        console.log('Rendering', plots.length, 'plots');
+        historyList.innerHTML = '';
+        plots.forEach(plot => {
+          console.log('Rendering plot:', plot.name);
+          const item = document.createElement('div');
+          item.className = 'history-item';
+          if (plot.filename === currentPlotFilename) {
+            item.classList.add('active');
+          }
+
+          const name = document.createElement('div');
+          name.className = 'history-item-name';
+          name.textContent = plot.name || plot.filename;
+
+          const desc = document.createElement('div');
+          desc.className = 'history-item-desc';
+          desc.textContent = plot.description || 'No description';
+
+          const time = document.createElement('div');
+          time.className = 'history-item-time';
+          const date = new Date(plot.timestamp);
+          time.textContent = date.toLocaleString();
+
+          item.appendChild(name);
+          item.appendChild(desc);
+          item.appendChild(time);
+
+          item.addEventListener('click', () => loadPlot(plot.filename));
+
+          historyList.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading plot history:', error);
+      }
+    }
+
+    async function loadPlot(filename) {
+      try {
+        updateStatus('editor-status', 'Loading plot...', '');
+        const response = await fetch(`/plot/${filename}`);
+        if (!response.ok) {
+          throw new Error('Failed to load plot');
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        currentPlotFilename = filename;
+        editor.setValue(data.code || '');
+        evaluateCode();
+        updateStatus('editor-status', `Loaded: ${data.name || filename}`, 'success');
+
+        // Update active state in history
+        loadPlotHistory();
+      } catch (error) {
+        updateStatus('editor-status', `Error: ${error.message}`, 'error');
+      }
     }
 
     function loadExample() {

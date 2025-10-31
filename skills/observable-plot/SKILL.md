@@ -100,53 +100,165 @@ The Observable Plot skill includes an interactive live editor and viewer for dev
 
 ### Starting the Viewer
 
+**Launch from your working directory** (where you want plots to be created):
+
 ```bash
-cd skills/observable-plot/scripts
-uv run plot-viewer
+# From your project directory
+uv run --directory ~/.claude/skills/observable-plot/scripts plot-viewer --plots-dir $(pwd)/plots
 ```
 
-This launches a split-pane editor with live preview on http://localhost:8765
+Or if you're already in the skills directory structure:
+
+```bash
+# Shorter version from within skills directory
+uv run --directory observable-plot/scripts plot-viewer --plots-dir $(pwd)/plots
+```
+
+This launches a three-pane interface with history sidebar, live preview, and code editor on http://localhost:8765
+
+**The viewer automatically detects if it's already running and just opens a new browser tab.**
 
 **Options:**
+- `--plots-dir PATH` - Specify plots directory (default: ./plots)
 - `--port 8080` - Use a different port
 - `--no-browser` - Don't auto-open browser
-- `--create-example` - Create example temp file on startup
+- `--create-example` - Create example plot file on startup
 
 ### Using with Claude
 
-Claude can write visualization code that automatically loads in the viewer:
+Claude can write visualization code to JSON files that automatically load in the viewer:
 
-1. Claude writes code to `/tmp/observable-plot-code.js`
-2. Open the viewer: `uv run plot-viewer`
-3. Click "Load Temp File" to see the visualization
-4. Edit code and see live updates as you type
+#### Writing Plot Files
 
-**Example workflow:**
-```javascript
-// Claude writes this to /tmp/observable-plot-code.js
-const data = [
-  {category: "A", value: 10},
-  {category: "B", value: 20},
-  {category: "C", value: 15}
-];
+**IMPORTANT**: Claude should check its current working directory and write plot files to `$(pwd)/plots/`.
 
-return Plot.plot({
-  marks: [
-    Plot.barY(data, {x: "category", y: "value"})
-  ]
-})
+**Workflow:**
+1. User launches viewer from their working directory with `--plots-dir $(pwd)/plots`
+2. Viewer displays the plots directory it's watching on startup
+3. Claude checks its current directory and creates `plots/` subdirectory
+4. Claude writes plot JSON files to `plots/filename.json`
+5. Viewer automatically detects and displays new plots in the history sidebar
+
+**For Claude:**
+1. Check the current directory with `pwd`
+2. Ensure the `plots` subdirectory exists with `mkdir -p plots`
+3. Write plot files to `plots/filename.json`
+
+The viewer will show which directory it's watching on startup, so you can verify Claude is writing to the correct location.
+
+#### JSON File Format
+
+Claude writes plot files to `$(pwd)/plots/` with this structure:
+
+```json
+{
+  "name": "Sales Analysis",
+  "description": "Monthly revenue by product category",
+  "code": "const data = [...]; return Plot.plot({...})",
+  "timestamp": "2025-10-31T12:34:56.789Z"
+}
 ```
 
-The code must return a `Plot.plot()` result using `return` and has access to `Plot` and `d3` globals. Click "Load Temp File" in the viewer to render it.
+**Fields:**
+- `name` - Descriptive name shown in history (required)
+- `description` - Brief description shown in history sidebar (optional)
+- `code` - JavaScript code that returns a Plot.plot() result (required)
+- `timestamp` - ISO timestamp for tracking creation time (required)
+
+#### File Naming Convention
+
+Use descriptive filenames that make sense:
+- `sales-by-category-2025.json`
+- `temperature-trends-seattle.json`
+- `penguins-body-mass-analysis.json`
+
+Avoid generic names like `plot1.json` or `temp.json`.
+
+#### Example Workflow
+
+**Step 0: Launch the viewer from your working directory**
+
+```bash
+cd /Users/mberg/projects/myapp
+uv run --directory ~/.claude/skills/observable-plot/scripts plot-viewer --plots-dir $(pwd)/plots
+```
+
+The viewer will print: `Watching plots directory: /Users/mberg/projects/myapp/plots`
+
+**Step 1: Check current directory and ensure plots folder exists**
+
+```bash
+pwd
+# Output: /Users/mberg/projects/myapp
+
+mkdir -p plots
+```
+
+**Step 2: Write the plot file**
+
+```bash
+cat > plots/sales-analysis-2025.json << 'EOF'
+{
+  "name": "Sales Analysis",
+  "description": "Monthly revenue by product category",
+  "code": "const data = [\n  {month: 'Jan', revenue: 1000},\n  {month: 'Feb', revenue: 1200}\n];\n\nreturn Plot.plot({\n  marks: [\n    Plot.barY(data, {x: 'month', y: 'revenue'})\n  ]\n})",
+  "timestamp": "2025-10-31T12:34:56.789Z"
+}
+EOF
+```
+
+**Step 3: Viewer automatically detects and loads the new plot**
+
+The viewer polls every 5 seconds for new plots and will automatically:
+- Add the plot to the history sidebar
+- Load it as the current plot
+- Display the visualization
+
+**Step 4: User interaction**
+
+Users can then:
+- Switch between plots using the history sidebar
+- Edit code in the editor and see live updates
+- Save modified plots to new files
 
 ### Viewer Features
 
+- **History Sidebar**: Browse all saved plots with names, descriptions, and timestamps
 - **Live Preview**: Chart updates as you type (500ms debounce)
 - **Monaco Editor**: Full-featured code editor with syntax highlighting
-- **Built-in Examples**: Load sample charts with one click
+- **File Switching**: Click any plot in history to load it instantly
+- **Auto-reload**: Detects new plots automatically (polls every 5 seconds)
 - **Resizable Panes**: Drag divider to adjust layout
 - **Error Display**: See error messages clearly when code fails
 - **Keyboard Shortcut**: ⌘+Enter to manually run code
+- **Persistent Storage**: All plots saved in `plots/` directory for future use
+
+### Code Requirements
+
+The `code` field must:
+- Return a `Plot.plot()` result using `return`
+- Have access to `Plot` and `d3` globals
+- Be valid JavaScript (async/await supported)
+
+**Example:**
+```javascript
+// Fetch and visualize data
+const data = await fetch(
+  "https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/penguins.csv"
+).then(r => r.text()).then(text => d3.csvParse(text, d3.autoType));
+
+return Plot.plot({
+  marks: [
+    Plot.dot(data, {
+      x: "flipper_length_mm",
+      y: "body_mass_g",
+      fill: "species",
+      tip: true
+    })
+  ],
+  color: { legend: true }
+})
+```
 
 ## Sample Datasets
 

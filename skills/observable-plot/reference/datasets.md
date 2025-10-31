@@ -58,11 +58,13 @@ Plot.plot({
 
 ### City Wages (citywages.csv)
 
-**Description**: Wage data across different cities.
+**Description**: Metropolitan area population and wage inequality data comparing 1980 and 2015. Includes population figures and 90th/10th percentile wage ratios for major US metro areas.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/citywages.csv
 
-**Use cases**: Comparative analysis, city-level wage visualizations
+**Columns**: `Metro`, `POP_1980`, `LPOP_1980`, `R90_10_1980`, `POP_2015`, `LPOP_2015`, `R90_10_2015`, `nyt_display`, `state_display`, `highlight`
+
+**Use cases**: Comparative analysis, wage inequality visualizations, population growth trends, time series comparisons
 
 ---
 
@@ -123,36 +125,38 @@ Plot.plot({
 
 ### Software Dependencies (flare.csv)
 
-**Description**: Hierarchical software package structure.
+**Description**: Hierarchical software package structure from the Flare ActionScript visualization library. Contains package names and file sizes in a hierarchical format.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/flare.csv
 
-**Columns**: `id`, `value`
+**Columns**: `name`, `size`
 
-**Use cases**: Tree diagrams, hierarchical visualizations, treemaps
+**Use cases**: Tree diagrams, hierarchical visualizations, treemaps, sunburst charts
 
 ---
 
 
 ### Industry Sectors (industries.csv)
 
-**Description**: Industry data with employees and wage information.
+**Description**: Time series data of unemployment by industry sector from 2000-present. Tracks unemployed workers across major US industries including manufacturing, retail, services, and more.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/industries.csv
 
-**Columns**: `industry`, `employees`, `wages`
+**Columns**: `date`, `industry`, `unemployed`
 
-**Use cases**: Bar charts, comparisons, economic analysis
+**Use cases**: Time series analysis, industry comparisons, unemployment trends, economic analysis
 
 ---
 
 ### Olympians (olympians.csv)
 
-**Description**: Olympic athletes with physical characteristics and sports.
+**Description**: Olympic athletes with physical characteristics, sports, and medal counts. Includes biographical data and performance statistics for Olympic competitors.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/olympians.csv
 
-**Use cases**: Scatterplots, grouped visualizations, distribution analysis
+**Columns**: `id`, `name`, `nationality`, `sex`, `date_of_birth`, `height`, `weight`, `sport`, `gold`, `silver`, `bronze`, `info`
+
+**Use cases**: Scatterplots, grouped visualizations, distribution analysis, medal statistics, athlete demographics
 
 ---
 
@@ -189,31 +193,39 @@ Plot.plot({
 
 ### Pizza (pizza.csv)
 
-**Description**: Pizza restaurant data and ratings.
+**Description**: Pizza sales data including orders, pricing, and revenue by pizza type. Contains daily transaction data with pizza categories (Classic, Specialty) and sizes.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/pizza.csv
 
-**Use cases**: Comparisons, ratings analysis, categorical visualization
+**Columns**: `order_date`, `day_of_week`, `category`, `name`, `price`, `orders`, `revenue`
+
+**Use cases**: Sales analysis, time series, revenue comparisons, categorical visualization, day-of-week patterns
 
 ---
 
 ### Weather (weather.csv)
 
-**Description**: Weather observations including temperature and precipitation.
+**Description**: Daily weather observations for Seattle from 2012-2015. Includes temperature, precipitation, wind speed, and weather conditions.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/weather.csv
 
-**Use cases**: Time series, weather patterns, seasonal analysis
+**Columns**: `location`, `date`, `precipitation`, `temp_max`, `temp_min`, `wind`, `weather`
+
+**Use cases**: Time series, weather patterns, seasonal analysis, precipitation visualization, temperature trends
 
 ---
 
 ### Miserables (miserables.json)
 
-**Description**: Character relationship data from Les Misérables.
+**Description**: Character relationship network from Les Misérables. Contains nodes representing characters and links representing their relationships, structured for network graph visualizations.
 
 **URL**: https://raw.githubusercontent.com/observablehq/sample-datasets/refs/heads/main/miserables.json
 
-**Use cases**: Network diagrams, relationship visualization, force-directed graphs
+**Structure**:
+- `nodes`: Array of objects with `id` (character name) and `group` (community cluster)
+- `links`: Array of objects with `source`, `target`, and `value` (relationship strength)
+
+**Use cases**: Network diagrams, relationship visualization, force-directed graphs, community detection
 
 ---
 

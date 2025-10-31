@@ -73,3 +73,7 @@ ehthumbs.db
 dist/
 build/
 *.egg-info/
+
+# Plot files (user-generated visualizations)
+plots/
+.current-plot.json
