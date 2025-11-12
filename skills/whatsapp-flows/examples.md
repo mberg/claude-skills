@@ -2,9 +2,77 @@
 
 Complete, working Flow JSON examples demonstrating common patterns.
 
-## Example 0: Markdown Formatting (Recommended)
+## Example 0: Minimal Client-Side Flow (No Backend)
 
-Demonstrates proper use of markdown formatting in TextBody with Business 3.0 API structure.
+Demonstrates a simple flow with no server integration needed. Best for basic form collection without validation endpoints.
+
+```json
+{
+  "version": "7.1",
+  "screens": [
+    {
+      "id": "START",
+      "title": "Welcome",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Welcome!"
+          },
+          {
+            "type": "TextBody",
+            "text": "This is a simple client-side flow with no backend endpoint.",
+            "markdown": true
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "name": "navigate",
+              "next": {
+                "type": "screen",
+                "name": "COMPLETE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "COMPLETE",
+      "title": "Complete",
+      "terminal": true,
+      "success": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Done!"
+          },
+          {
+            "type": "Footer",
+            "label": "Finish",
+            "on-click-action": {
+              "name": "complete",
+              "payload": {}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Note:** No `data_api_version` needed since this flow doesn't use server endpoints.
+
+---
+
+## Example 0a: Markdown Formatting with Server Integration
+
+Demonstrates markdown formatting in TextBody with full Business 3.0 API structure including server integration.
 
 ```json
 {
@@ -77,6 +145,7 @@ Demonstrates proper use of markdown formatting in TextBody with Business 3.0 API
 - Use Business 3.0 API structure with `name`, `next`, `type` in actions
 - Set `markdown: true` to enable formatting
 - Markdown syntax: `**bold**`, `*italic*`, `\n` for breaks, `• item` for lists
+- `data_api_version: "3.0"` is only needed if calling backend endpoints
 
 ---
 

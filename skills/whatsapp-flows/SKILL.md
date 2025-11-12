@@ -31,7 +31,6 @@ WhatsApp Flows are structured conversations that collect user input through a se
 ```json
 {
   "version": "7.1",
-  "data_api_version": "3.0",
   "screens": [
     {
       "id": "GREETING",
@@ -99,8 +98,12 @@ WhatsApp Flows are structured conversations that collect user input through a se
 
 **Business 3.0 API Requirements:**
 - Every screen MUST have a `title` property
-- Use `data_api_version: "3.0"` for server integration
 - Action properties use `name` (not `action`) with nested structure
+
+**When to add `data_api_version`:**
+- Only include `"data_api_version": "3.0"` if your flow needs server integration (data validation, dynamic data, form submission to backend)
+- If your flow is client-side only with no backend endpoints, omit this property
+- See [server-integration.md](reference/server-integration.md) for details on setting up endpoints
 
 ---
 
@@ -118,11 +121,14 @@ WhatsApp Flows uses the Business 3.0 API which has specific requirements:
 - **TextHeading does NOT support markdown** (will cause validation error)
 - Markdown is disabled by default if property omitted
 
-**Recommended structure:**
+**Optional server integration:**
+- `data_api_version: "3.0"` - Only required if your flow calls backend endpoints
+- `routing_model` - Only required with `data_api_version` for dynamic routing
+
+**Minimal structure (no backend needed):**
 ```json
 {
   "version": "7.1",
-  "data_api_version": "3.0",
   "screens": [
     {
       "id": "SCREEN_ID",
@@ -133,7 +139,23 @@ WhatsApp Flows uses the Business 3.0 API which has specific requirements:
 }
 ```
 
-See **[constraints.md](reference/constraints.md)** for complete validation rules.
+**With server integration (backend endpoints):**
+```json
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "routing_model": { ... },
+  "screens": [
+    {
+      "id": "SCREEN_ID",
+      "title": "Screen Title",
+      "layout": { ... }
+    }
+  ]
+}
+```
+
+See **[constraints.md](reference/constraints.md)** for complete validation rules and **[server-integration.md](reference/server-integration.md)** for endpoint setup.
 
 ---
 
