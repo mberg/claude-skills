@@ -81,22 +81,41 @@ Body text for descriptions, instructions, and explanations.
 
 **Properties:**
 - `text` (required, max 4096 chars) - Body text
+- `markdown` (optional, default: false, v5.1+) - Enable markdown formatting
 - `font-weight` (optional) - `regular` or `bold`
 
 **Markdown Support (v5.1+):**
+
+To enable markdown, set `"markdown": true`. Supported formatting:
 - Bold: `**text**`
 - Italic: `*text*`
 - Line breaks: `\n`
 - Lists: `• item` or `1. item`
 
+**Without markdown enabled:**
 ```json
 {
   "type": "TextBody",
-  "text": "**Bold text** and *italic text* are supported.\n\n• List item\n• Another item"
+  "text": "Plain text only. Markdown syntax **won't** be formatted."
 }
 ```
 
-**Usage:** Descriptive text, instructions, regular content. Markdown for formatting.
+**With markdown enabled:**
+```json
+{
+  "type": "TextBody",
+  "text": "**Bold text** and *italic text* are supported.\n\n• List item\n• Another item",
+  "markdown": true
+}
+```
+
+**Important:**
+- Markdown property only works on **TextBody**, not TextHeading
+- Must explicitly set `"markdown": true` to enable formatting
+- Without this property, markdown syntax displays as plain text
+- RichText (v5.1+) always supports full markdown without needing the property
+
+**Usage:** Descriptive text, instructions, regular content. Use markdown for formatted lists, bold labels, and emphasis.
 
 ---
 
@@ -106,13 +125,23 @@ Small caption text for supplementary information.
 
 **Properties:**
 - `text` (required, max 409 chars) - Caption text
+- `markdown` (optional, default: false, v5.1+) - Enable markdown formatting
 
-**Markdown Support (v5.1+):** Same as TextBody.
+**Markdown Support (v5.1+):** Set `"markdown": true` to use markdown (same as TextBody).
 
 ```json
 {
   "type": "TextCaption",
   "text": "Your information is secure and will not be shared."
+}
+```
+
+**With markdown:**
+```json
+{
+  "type": "TextCaption",
+  "text": "**Required:** *This field is mandatory*",
+  "markdown": true
 }
 ```
 

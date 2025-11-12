@@ -59,17 +59,21 @@ All character limits, component counts, and validation rules for WhatsApp Flows.
 
 ### Required Properties
 
-- **Flow level:**
-  - `version` - Flow JSON version
+- **Flow level (Business 3.0 API):**
+  - `version` - Flow JSON version (recommend 7.1)
   - `screens` - Array of screens
+  - `data_api_version` (recommended) - Set to "3.0" for server integration
 
-- **Screen level:**
-  - `id` - Unique screen identifier
+- **Screen level (REQUIRED):**
+  - `id` - Unique screen identifier (alphanumeric + underscore)
+  - `title` - Screen title for navigation and context (MUST be present)
   - `layout` - UI layout definition
 
 - **Layout level:**
   - `type` - Must be "SingleColumnLayout"
   - `children` - Array of components
+
+**Important:** Every screen MUST have a `title` property. This is a Business 3.0 API requirement.
 
 ### Screen ID Rules
 
@@ -127,13 +131,44 @@ All character limits, component counts, and validation rules for WhatsApp Flows.
 - Max 10 destinations per screen
 - Cannot self-reference
 
+## Markdown Configuration
+
+TextBody and TextCaption components support markdown formatting (v5.1+).
+
+**Important:** Markdown is disabled by default. To enable it:
+
+```json
+{
+  "type": "TextBody",
+  "text": "**Bold** and *italic* text",
+  "markdown": true
+}
+```
+
+**Supported markdown in TextBody/TextCaption:**
+- Bold: `**text**`
+- Italic: `*text*`
+- Line breaks: `\n`
+- Bullet lists: `• item`
+- Numbered lists: `1. item`
+
+**Key Rules:**
+- Only TextBody and TextCaption support markdown property
+- TextHeading DOES NOT support markdown (error if included)
+- RichText always supports full markdown without needing property
+- Default is `markdown: false` if property omitted
+- When false, markdown syntax displays as plain text
+
+---
+
 ## Validation Checklist
 
 ### Before Deploying
 
 - [ ] Valid JSON syntax
 - [ ] All required properties present
-- [ ] Version specified (4.0-7.1)
+- [ ] Version specified (4.0-7.1, recommend 7.1)
+- [ ] **ALL screens have `title` property** (Business 3.0 requirement)
 - [ ] All screen IDs unique
 - [ ] All field names unique per screen
 - [ ] Character limits respected
@@ -144,6 +179,8 @@ All character limits, component counts, and validation rules for WhatsApp Flows.
 - [ ] Image URLs are HTTPS
 - [ ] Routing model consistent (if used)
 - [ ] No undefined component types
+- [ ] Markdown only on TextBody/TextCaption, not TextHeading
+- [ ] `markdown: true` explicitly set where needed
 
 ### Testing
 
@@ -170,6 +207,19 @@ All character limits, component counts, and validation rules for WhatsApp Flows.
     "type": "array",
     "__example__": ["Product A"]  // Add this
   }
+}
+```
+
+### Missing Screen Title
+
+**Error:** Screen missing required `title` property
+
+**Fix:** Add `title` to every screen:
+```json
+{
+  "id": "SCREEN_NAME",
+  "title": "User-Facing Screen Title",
+  "layout": { ... }
 }
 ```
 
@@ -235,6 +285,39 @@ All character limits, component counts, and validation rules for WhatsApp Flows.
 **Error:** Dropdown has 250 static options
 
 **Fix:** Reduce to max 200, or use dynamic data
+
+### Markdown property on TextHeading
+
+**Error:** Property 'markdown' is not allowed in 'TextHeading' component
+
+**Fix:** Move markdown to TextBody instead, or use RichText:
+```json
+// Wrong:
+{
+  "type": "TextHeading",
+  "text": "**Bold Heading**",
+  "markdown": true
+}
+
+// Correct - use TextBody for formatted content:
+{
+  "type": "TextHeading",
+  "text": "Heading"
+},
+{
+  "type": "TextBody",
+  "text": "**Bold text** here",
+  "markdown": true
+}
+
+// Or use RichText for full markdown:
+{
+  "type": "RichText",
+  "text": "# Heading\n**Bold text** here"
+}
+```
+
+**Important:** Only TextBody and TextCaption support the markdown property. TextHeading does not.
 
 ## Validation Tools
 

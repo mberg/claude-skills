@@ -31,15 +31,22 @@ WhatsApp Flows are structured conversations that collect user input through a se
 ```json
 {
   "version": "7.1",
+  "data_api_version": "3.0",
   "screens": [
     {
       "id": "GREETING",
+      "title": "Greeting",
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
           {
             "type": "TextHeading",
             "text": "Welcome!"
+          },
+          {
+            "type": "TextBody",
+            "text": "Please tell us your name to proceed.",
+            "markdown": true
           },
           {
             "type": "TextInput",
@@ -51,8 +58,11 @@ WhatsApp Flows are structured conversations that collect user input through a se
             "type": "Footer",
             "label": "Continue",
             "on-click-action": {
-              "action": "navigate",
-              "next_screen": "CONFIRMATION"
+              "name": "navigate",
+              "next": {
+                "type": "screen",
+                "name": "CONFIRMATION"
+              }
             }
           }
         ]
@@ -60,6 +70,7 @@ WhatsApp Flows are structured conversations that collect user input through a se
     },
     {
       "id": "CONFIRMATION",
+      "title": "Confirmation",
       "terminal": true,
       "success": true,
       "layout": {
@@ -73,7 +84,7 @@ WhatsApp Flows are structured conversations that collect user input through a se
             "type": "Footer",
             "label": "Done",
             "on-click-action": {
-              "action": "complete",
+              "name": "complete",
               "payload": {
                 "name": "${screen.GREETING.form.name}"
               }
@@ -86,6 +97,44 @@ WhatsApp Flows are structured conversations that collect user input through a se
 }
 ```
 
+**Business 3.0 API Requirements:**
+- Every screen MUST have a `title` property
+- Use `data_api_version: "3.0"` for server integration
+- Action properties use `name` (not `action`) with nested structure
+
+---
+
+## Business 3.0 API Requirements
+
+WhatsApp Flows uses the Business 3.0 API which has specific requirements:
+
+**Every screen MUST have:**
+- `id` (required) - Unique screen identifier
+- `title` (required) - Screen title for display and navigation
+
+**Markdown formatting:**
+- Only **TextBody** and **TextCaption** support markdown
+- Set `"markdown": true` to enable formatting
+- **TextHeading does NOT support markdown** (will cause validation error)
+- Markdown is disabled by default if property omitted
+
+**Recommended structure:**
+```json
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "screens": [
+    {
+      "id": "SCREEN_ID",
+      "title": "Screen Title",
+      "layout": { ... }
+    }
+  ]
+}
+```
+
+See **[constraints.md](reference/constraints.md)** for complete validation rules.
+
 ---
 
 ## Essential Constraints
@@ -95,11 +144,12 @@ WhatsApp Flows are structured conversations that collect user input through a se
 | Components per screen | 50 | Split into multiple screens if exceeded |
 | Nesting depth (If/Switch) | 3 levels | Simplify logic or use separate screens |
 | Flow JSON size | 10MB | Compress or split large flows |
-| Text heading length | 80 chars | Be concise with titles |
-| Text body length | 4096 chars | Supports markdown v5.1+ |
+| Text heading length | 80 chars | Be concise with titles (NO markdown) |
+| Text body length | 4096 chars | Supports markdown v5.1+ (set `markdown: true`) |
 | Dropdown options | 200 (static) | Use dynamic data for more options |
 | Image max size | 300KB | Optimize images before including |
 | Image count per screen | 3 | Limit media usage per screen |
+| Screen title | Required | Business 3.0 API requirement |
 
 See **[constraints.md](reference/constraints.md)** for complete reference.
 
@@ -188,12 +238,31 @@ See **[examples.md](examples.md)** for 4 complete, working flows:
 
 ## Common Tasks
 
+### I need to add formatted text (bold, lists, emphasis)
+
+1. Use **TextBody** or **TextCaption** components (not TextHeading)
+2. Add `"markdown": true` property to enable formatting
+3. Use markdown syntax: `**bold**`, `*italic*`, `\n` for line breaks, `• item` for lists
+4. Without `markdown: true`, markdown syntax displays as plain text
+5. For rich formatting with headers/tables, use **RichText** instead
+6. See [components.md](reference/components.md) text components section
+
+**Example:**
+```json
+{
+  "type": "TextBody",
+  "text": "**Important:** Please read the following carefully.\n\n• First item\n• Second item",
+  "markdown": true
+}
+```
+
 ### I need to collect user information
 
 1. Create a screen with TextInput, TextArea, DatePicker components
 2. Add Footer with navigate action to next screen
 3. On confirmation screen, use global reference `${screen.FIRST_SCREEN.form.field_name}`
-4. See [components.md](reference/components.md) input section
+4. Make sure every screen has a `title` property (Business 3.0 requirement)
+5. See [components.md](reference/components.md) input section
 
 ### I need conditional branching
 

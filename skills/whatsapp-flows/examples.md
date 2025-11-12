@@ -2,6 +2,84 @@
 
 Complete, working Flow JSON examples demonstrating common patterns.
 
+## Example 0: Markdown Formatting (Recommended)
+
+Demonstrates proper use of markdown formatting in TextBody with Business 3.0 API structure.
+
+```json
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "screens": [
+    {
+      "id": "WELCOME",
+      "title": "Formatted Content",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Important Information"
+          },
+          {
+            "type": "TextBody",
+            "text": "**Please note the following:**\n\n• Item 1 with important info\n• Item 2 with more details\n• Item 3 to remember\n\n*Last updated today*",
+            "markdown": true
+          },
+          {
+            "type": "Footer",
+            "label": "Acknowledge",
+            "on-click-action": {
+              "name": "navigate",
+              "next": {
+                "type": "screen",
+                "name": "COMPLETE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "COMPLETE",
+      "title": "Complete",
+      "terminal": true,
+      "success": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Done!"
+          },
+          {
+            "type": "TextBody",
+            "text": "**Bold text** and *italic text* are rendered correctly."
+          },
+          {
+            "type": "Footer",
+            "label": "Finish",
+            "on-click-action": {
+              "name": "complete",
+              "payload": {}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Key points:**
+- Every screen must have `title` property
+- Only TextBody supports `markdown: true` (NOT TextHeading)
+- Use Business 3.0 API structure with `name`, `next`, `type` in actions
+- Set `markdown: true` to enable formatting
+- Markdown syntax: `**bold**`, `*italic*`, `\n` for breaks, `• item` for lists
+
+---
+
 ## Example 1: Simple Multi-Screen Form
 
 A customer survey collecting name, rating, and feedback with a review screen.

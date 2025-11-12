@@ -6,6 +6,7 @@ Component-specific validator for WhatsApp Flows
 import json
 import sys
 from pathlib import Path
+from typing import Dict
 from colorama import Fore, Style, init
 
 init(autoreset=True)
@@ -64,6 +65,18 @@ class ComponentValidator:
             if required not in component:
                 print(f"{Fore.RED}❌ Screen '{screen_id}' {comp_type}: missing '{required}'{Style.RESET_ALL}")
                 self.errors += 1
+
+        # Check markdown property rules
+        has_markdown = "markdown" in component
+        if has_markdown:
+            # Only TextBody and TextCaption support markdown
+            if comp_type not in ["TextBody", "TextCaption"]:
+                print(f"{Fore.RED}❌ Screen '{screen_id}' {comp_type}: Property 'markdown' is not allowed in '{comp_type}' component{Style.RESET_ALL}")
+                self.errors += 1
+            else:
+                # Warn if markdown is enabled
+                if component.get("markdown") is True:
+                    print(f"{Fore.CYAN}✓ Screen '{screen_id}' {comp_type}: markdown enabled{Style.RESET_ALL}")
 
         # Check text limits
         if "max_text" in spec:
