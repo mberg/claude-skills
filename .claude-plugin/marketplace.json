@@ -1,0 +1,34 @@
+{
+  "name": "claude-skills",
+  "owner": {
+    "name": "Matt Berg",
+    "email": "mberg@recodelabs.org"
+  },
+  "metadata": {
+    "description": "Claude Code skills for data visualization, form authoring, and conversational experiences",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "xlsform",
+      "description": "Authoring data collection forms in Excel for mobile surveys. XLSForm converts Excel files to XForms for ODK, KoBoToolbox, and similar platforms. Use for field surveys, data collection, conditional forms, GPS tracking, and offline data gathering.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/xlsform"]
+    },
+    {
+      "name": "whatsapp-flows",
+      "description": "Authoring WhatsApp Business Flows with validation, component guidance, and server integration patterns. Use when building conversational experiences, collecting user data, implementing conditional logic, or integrating with backend endpoints.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/whatsapp-flows"]
+    },
+    {
+      "name": "observable-plot",
+      "description": "Create data visualizations using Observable Plot's declarative grammar of graphics. Use for charts, maps, heatmaps, and exploratory data analysis.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/observable-plot"]
+    }
+  ]
+}
