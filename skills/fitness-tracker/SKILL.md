@@ -1,11 +1,67 @@
 ---
 name: fitness-tracker
-description: Parse workout logs from Obsidian markdown files into CSV and query with DuckDB. Use when the user wants to analyze workout data, track fitness progress, query exercise history, or parse workout markdown files.
+description: Log and analyze workouts. Use when the user wants to (1) record a workout at the gym via conversation, (2) parse workout markdown files to CSV, (3) query exercise history with DuckDB, or (4) track fitness progress. Triggers on "log workout", "record workout", "track workout", "add exercises", "what did I lift", etc.
 ---
 
 # Fitness Tracker
 
-Parse workouts from markdown files into structured CSV data for analysis with DuckDB.
+Log workouts via conversation and analyze workout data with DuckDB.
+
+## Chat Mode - Logging Workouts
+
+Use this conversational flow when the user wants to record a workout:
+
+### Step 1: Date
+Ask for the workout date or default to today. Format: YYYY-MM-DD
+
+### Step 2: Muscle Group
+Ask what they're working. Categories from `reference/exercises.md`:
+- Chest, Back, Shoulders, Legs
+- Arms - Biceps, Arms - Triceps
+- Core, Compound, Cardio
+
+### Step 3: Exercise Selection
+Show exercises from that category. Let user pick or type their own.
+
+### Step 4: Sets Entry
+User enters sets naturally:
+- "135 for 10, 10" → `- 135 - 10, 10`
+- "185 - 8, 8, 8" → `- 185 - 8, 8, 8`
+- "10, 10, 10" (bodyweight) → `- 10, 10, 10`
+- "30 minutes" (cardio) → `- 30m`
+- Add "warmup" or other notes as `// comment`
+
+### Step 5: More Exercises?
+Ask if they want to add another exercise. Repeat steps 2-4 as needed.
+
+### Step 6: Save
+Append to the workout file in `obsidian_workout_dir` from `scripts/config.json`:
+- File: `workouts-YYYY-MM.md` (based on workout date)
+- Add `## YYYY-MM-DD` header if it's a new day
+- Append exercise name and sets in the format below
+
+### Example Conversation
+```
+User: Log my workout
+Claude: What date? (default: today, 2026-01-02)
+User: Today
+Claude: What are you working? (Chest, Back, Shoulders, Legs, Arms, Core, Cardio)
+User: Chest
+Claude: Chest exercises: Bench Press, Incline Bench Press, Dumbbell Press, Cable Flyes, Push-ups, Dips...
+User: Bench
+Claude: Enter your sets (e.g., "135 - 10, 10" or "185 for 8, 8, 8"):
+User: 135 for 10, 10 warmup, then 185 - 8, 8, 8
+Claude: Got it:
+  Bench Press
+  - 135 - 10, 10 // warmup
+  - 185 - 8, 8, 8
+
+  Another exercise?
+User: Cable flyes, 30 - 12, 12, 12
+Claude: Added. Another exercise?
+User: Done
+Claude: Saved to workouts-2026-01.md
+```
 
 ## Workout File Format
 
@@ -45,7 +101,17 @@ Edit `scripts/config.json` to set default paths:
 }
 ```
 
-## Parsing Workouts
+## Writing Workout Files
+
+When saving workouts in chat mode:
+1. Read `scripts/config.json` to get `obsidian_workout_dir`
+2. Target file: `{obsidian_workout_dir}/workouts-YYYY-MM.md`
+3. If file exists, check if today's date header `## YYYY-MM-DD` exists
+4. If date header missing, append it first with a blank line before
+5. Append exercise name and sets under the date header
+6. Use Obsidian MCP tools (`obsidian_append_content`, `obsidian_patch_content`) if available, otherwise write directly to filesystem
+
+## Parse Mode - Analyzing Workouts
 
 ```bash
 # Uses paths from config.json
