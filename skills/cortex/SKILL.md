@@ -85,7 +85,17 @@ Saved to notes-2026-01-03.md:
 
 ## Daily Notes Format
 
-Files are named `notes-YYYY-MM-DD.md` (one file per day). Multiple entries per day append to the same file.
+Files are named `notes-YYYY-MM-DD.md` (one file per day). Multiple sessions throughout the day all append to the same file.
+
+### Ordering Multiple Entries
+
+When appending a new entry:
+1. Fetch existing daily note
+2. Parse existing entries by their `## HH:MM` timestamps
+3. Insert new entry in chronological order (don't intermix - each summary stays as a complete block)
+4. Push updated file
+
+The exact timestamp isn't critical - entries just need to be roughly in order of when they happened.
 
 Example: `notes-2026-01-03.md`
 ```markdown
