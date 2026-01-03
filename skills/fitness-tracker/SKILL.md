@@ -36,9 +36,8 @@ Ask if they want to add another exercise. Repeat steps 2-4 as needed.
 
 ### Step 6: Save
 Save the workout to GitHub (or Obsidian as fallback):
-- File: `workouts-YYYY-MM.md` (based on workout date)
-- Add `## YYYY-MM-DD` header if it's a new day
-- Append exercise name and sets in the format below
+- File: `YYYY-MM-DD.md` (one file per day, e.g., `2026-01-02.md`)
+- If file exists, append new exercises (multiple workouts per day are supported)
 - Push to GitHub using `scripts/github_sync.py`
 
 ### Example Conversation
@@ -61,16 +60,15 @@ Claude: Got it:
 User: Cable flyes, 30 - 12, 12, 12
 Claude: Added. Another exercise?
 User: Done
-Claude: Saved to workouts-2026-01.md
+Claude: Saved to 2026-01-02.md
 ```
 
 ## Workout File Format
 
-Files are named `workouts-YYYY-MM.md` with multiple workouts per month:
+Files are named `YYYY-MM-DD.md` (one file per day). Multiple workouts in a day append to the same file.
 
+Example: `2026-01-02.md`
 ```markdown
-## 2026-01-02
-
 Bench
 - 135 - 10, 10 // warmup
 - 185 - 8, 8, 8
@@ -84,7 +82,7 @@ Treadmill
 
 ### Format Rules
 
-- **Date header**: `## YYYY-MM-DD`
+- **Filename**: `YYYY-MM-DD.md` (date is in the filename)
 - **Exercise name**: Plain text on its own line
 - **Weighted sets**: `- weight - reps, reps, reps` (e.g., `- 185 - 8, 8, 8`)
 - **Bodyweight sets**: `- reps, reps, reps` (e.g., `- 10, 10, 10`)
@@ -118,46 +116,76 @@ Edit `scripts/config.json` to configure GitHub (default) or Obsidian storage:
 
 When saving workouts in chat mode:
 
-### GitHub (Default)
-1. Read `scripts/config.json` to get GitHub settings
-2. Create/update local temp file: `workouts-YYYY-MM.md`
-3. If file exists in repo, fetch it first and append new workout
-4. Add `## YYYY-MM-DD` header if it's a new day
-5. Append exercise name and sets under the date header
-6. Push to GitHub using `scripts/github_sync.py`:
-   ```bash
-   uv run scripts/github_sync.py \
-     --file /tmp/workouts-2026-01.md \
-     --dest workouts/workouts-2026-01.md \
-     -m "Add workout for 2026-01-02"
-   ```
-7. Also push updated `workouts.csv` after parsing:
-   ```bash
-   uv run scripts/parse_workout.py /tmp/workouts-2026-01.md -o /tmp/workouts.csv
-   uv run scripts/github_sync.py \
-     --file /tmp/workouts.csv \
-     --dest workouts/workouts.csv \
-     -m "Update workout data"
-   ```
+### GitHub Workflow
+
+**Important:** Must `cd` into the scripts directory so `github_sync.py` can find `config.json`.
+
+#### Step 1: Fetch existing file from GitHub (if any)
+
+```bash
+cd /mnt/skills/user/fitness-tracker/scripts
+uv run github_sync.py --fetch workouts/2026-01-02.md > /tmp/2026-01-02.md
+```
+
+If the file doesn't exist yet, create it empty.
+
+#### Step 2: Append exercises to the local file
+
+```bash
+cat >> /tmp/2026-01-02.md << 'EOF'
+
+Pull-ups
+- 10, 10, 10
+EOF
+```
+
+#### Step 3: Push back to GitHub
+
+```bash
+cd /mnt/skills/user/fitness-tracker/scripts
+uv run github_sync.py \
+  --file /tmp/2026-01-02.md \
+  --dest workouts/2026-01-02.md \
+  -m "Add workout for 2026-01-02"
+```
+
+#### Step 4: Update CSV
+
+Fetch existing CSV, parse the new workout, and update:
+
+```bash
+cd /mnt/skills/user/fitness-tracker/scripts
+uv run github_sync.py --fetch workouts/workouts.csv > /tmp/workouts.csv
+uv run parse_workout.py /tmp/2026-01-02.md -o /tmp/workouts.csv --append
+uv run github_sync.py \
+  --file /tmp/workouts.csv \
+  --dest workouts/workouts.csv \
+  -m "Update workout data"
+```
+
+The `--append` flag replaces rows for the parsed date(s) while keeping other dates intact.
 
 ### Obsidian (Fallback)
+
 If GitHub is not configured (`github_repo` is empty):
 1. Use `obsidian_workout_dir` from config
-2. Target file: `{obsidian_workout_dir}/workouts-YYYY-MM.md`
+2. Target file: `{obsidian_workout_dir}/YYYY-MM-DD.md`
 3. Use Obsidian MCP tools or write directly to filesystem
 
 ## Parse Mode - Analyzing Workouts
 
 ```bash
-# Uses paths from config.json
-uv run scripts/parse_workout.py
-
-# Override with explicit paths
+# Parse all daily workout files in a directory
 uv run scripts/parse_workout.py /path/to/workouts/ -o workouts.csv
 
+# Parse a single day and update existing CSV (replaces that date's rows)
+uv run scripts/parse_workout.py /tmp/2026-01-02.md -o workouts.csv --append
+
 # Parse and run a query
-uv run scripts/parse_workout.py --query "SELECT * FROM workouts"
+uv run scripts/parse_workout.py /path/to/workouts/ --query "SELECT * FROM workouts"
 ```
+
+The parser matches files named `YYYY-MM-DD.md` and extracts the date from the filename.
 
 ## Exercise Validation
 

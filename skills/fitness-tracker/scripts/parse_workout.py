@@ -141,10 +141,18 @@ def parse_set_line(line, current_date, current_exercise, set_counter):
     return rows, set_counter
 
 
+def extract_date_from_filename(filepath):
+    """Extract date from filename like 2026-01-02.md."""
+    name = Path(filepath).stem
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', name):
+        return name
+    return None
+
+
 def parse_workout_file(filepath):
     """Parse a workout markdown file and return list of row dicts."""
     rows = []
-    current_date = None
+    current_date = extract_date_from_filename(filepath)
     current_exercise = None
     set_counter = 1
 
@@ -192,7 +200,7 @@ def parse_workouts(input_path):
     if input_path.is_file():
         all_rows.extend(parse_workout_file(input_path))
     elif input_path.is_dir():
-        for md_file in sorted(input_path.glob("*.md")):
+        for md_file in sorted(input_path.glob("????-??-??.md")):
             all_rows.extend(parse_workout_file(md_file))
     else:
         raise FileNotFoundError(f"Path not found: {input_path}")
@@ -208,6 +216,23 @@ def write_csv(rows, output_path):
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def update_csv(csv_path, new_rows):
+    """Update CSV by replacing rows for dates in new_rows, keeping other dates."""
+    fieldnames = ["date", "exercise", "set_num", "weight", "reps", "duration_min", "notes"]
+    dates_to_replace = set(row["date"] for row in new_rows)
+
+    existing = []
+    csv_path = Path(csv_path)
+    if csv_path.exists():
+        with open(csv_path) as f:
+            reader = csv.DictReader(f)
+            existing = [row for row in reader if row["date"] not in dates_to_replace]
+
+    all_rows = existing + new_rows
+    all_rows.sort(key=lambda r: (r["date"], r["exercise"], int(r["set_num"])))
+    write_csv(all_rows, csv_path)
 
 
 def run_query(csv_path, query):
@@ -242,6 +267,11 @@ def main():
         default="workouts.csv",
         help="Output CSV file (default: workouts.csv)"
     )
+    parser.add_argument(
+        "--append", "-a",
+        action="store_true",
+        help="Update existing CSV: replace rows for parsed dates, keep others"
+    )
     parser.add_argument("--query", "-q", help="Run DuckDB query after parsing")
 
     args = parser.parse_args()
@@ -264,8 +294,12 @@ def main():
     validate_exercises(rows, known_exercises)
 
     # Write CSV
-    write_csv(rows, args.output)
-    print(f"Wrote {len(rows)} sets to {args.output}")
+    if args.append:
+        update_csv(args.output, rows)
+        print(f"Updated {args.output} with {len(rows)} sets")
+    else:
+        write_csv(rows, args.output)
+        print(f"Wrote {len(rows)} sets to {args.output}")
 
     # Run query if provided
     if args.query:
