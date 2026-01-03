@@ -35,10 +35,11 @@ User enters sets naturally:
 Ask if they want to add another exercise. Repeat steps 2-4 as needed.
 
 ### Step 6: Save
-Append to the workout file in `obsidian_workout_dir` from `scripts/config.json`:
+Save the workout to GitHub (or Obsidian as fallback):
 - File: `workouts-YYYY-MM.md` (based on workout date)
 - Add `## YYYY-MM-DD` header if it's a new day
 - Append exercise name and sets in the format below
+- Push to GitHub using `scripts/github_sync.py`
 
 ### Example Conversation
 ```
@@ -92,24 +93,59 @@ Treadmill
 
 ## Configuration
 
-Edit `scripts/config.json` to set default paths:
+Edit `scripts/config.json` to configure GitHub (default) or Obsidian storage:
 
 ```json
 {
+  "github_repo": "username/repo-name",
+  "github_token": "github_pat_xxxxx",
+  "github_branch": "main",
+  "github_workout_dir": "workouts",
   "obsidian_workout_dir": "/path/to/obsidian/vault/Fitness",
   "output_csv": "/path/to/workouts.csv"
 }
 ```
 
+### GitHub Configuration (Default)
+- `github_repo`: Your repository in `username/repo-name` format
+- `github_token`: Personal Access Token with `repo` scope. Create at: https://github.com/settings/tokens
+- `github_branch`: Target branch (default: `main`)
+- `github_workout_dir`: Directory in repo for workout files (default: `workouts`)
+
+### Obsidian Configuration (Fallback)
+- `obsidian_workout_dir`: Local path to Obsidian vault directory (used if GitHub not configured)
+
 ## Writing Workout Files
 
 When saving workouts in chat mode:
-1. Read `scripts/config.json` to get `obsidian_workout_dir`
-2. Target file: `{obsidian_workout_dir}/workouts-YYYY-MM.md`
-3. If file exists, check if today's date header `## YYYY-MM-DD` exists
-4. If date header missing, append it first with a blank line before
+
+### GitHub (Default)
+1. Read `scripts/config.json` to get GitHub settings
+2. Create/update local temp file: `workouts-YYYY-MM.md`
+3. If file exists in repo, fetch it first and append new workout
+4. Add `## YYYY-MM-DD` header if it's a new day
 5. Append exercise name and sets under the date header
-6. Use Obsidian MCP tools (`obsidian_append_content`, `obsidian_patch_content`) if available, otherwise write directly to filesystem
+6. Push to GitHub using `scripts/github_sync.py`:
+   ```bash
+   uv run scripts/github_sync.py \
+     --file /tmp/workouts-2026-01.md \
+     --dest workouts/workouts-2026-01.md \
+     -m "Add workout for 2026-01-02"
+   ```
+7. Also push updated `workouts.csv` after parsing:
+   ```bash
+   uv run scripts/parse_workout.py /tmp/workouts-2026-01.md -o /tmp/workouts.csv
+   uv run scripts/github_sync.py \
+     --file /tmp/workouts.csv \
+     --dest workouts/workouts.csv \
+     -m "Update workout data"
+   ```
+
+### Obsidian (Fallback)
+If GitHub is not configured (`github_repo` is empty):
+1. Use `obsidian_workout_dir` from config
+2. Target file: `{obsidian_workout_dir}/workouts-YYYY-MM.md`
+3. Use Obsidian MCP tools or write directly to filesystem
 
 ## Parse Mode - Analyzing Workouts
 
