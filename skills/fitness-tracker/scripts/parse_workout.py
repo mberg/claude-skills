@@ -239,8 +239,8 @@ def main():
     )
     parser.add_argument(
         "-o", "--output",
-        default=config.get("output_csv", "") or "workouts.csv",
-        help="Output CSV file (default: from config.json or workouts.csv)"
+        default="workouts.csv",
+        help="Output CSV file (default: workouts.csv)"
     )
     parser.add_argument("--query", "-q", help="Run DuckDB query after parsing")
 

@@ -5,7 +5,7 @@ description: Log and analyze workouts. Use when the user wants to (1) record a w
 
 # Fitness Tracker
 
-Log workouts via conversation and analyze workout data with DuckDB.
+Log workouts via conversation and save to github and analyze workout data with DuckDB.
 
 ## Chat Mode - Logging Workouts
 
@@ -101,8 +101,7 @@ Edit `scripts/config.json` to configure GitHub (default) or Obsidian storage:
   "github_token": "github_pat_xxxxx",
   "github_branch": "main",
   "github_workout_dir": "workouts",
-  "obsidian_workout_dir": "/path/to/obsidian/vault/Fitness",
-  "output_csv": "/path/to/workouts.csv"
+  "obsidian_workout_dir": "/path/to/obsidian/vault/Fitness"
 }
 ```
 
@@ -119,69 +118,29 @@ Edit `scripts/config.json` to configure GitHub (default) or Obsidian storage:
 
 When saving workouts in chat mode:
 
-### GitHub Workflow
-
-**Important:** Must `cd` into the scripts directory so `github_sync.py` can find `config.json`.
-
-#### Step 1: Fetch existing file from GitHub
-
-```bash
-cd /mnt/skills/user/fitness-tracker/scripts
-uv run github_sync.py --fetch workouts/workouts-2026-01.md > /tmp/workouts-2026-01.md
-```
-
-If the file doesn't exist yet, create it empty or with the date header.
-
-#### Step 2: Modify the local file
-
-Add new workout entries to the file. If it's a new day, add the date header first:
-
-```bash
-# Add date header if new day
-cat >> /tmp/workouts-2026-01.md << 'EOF'
-
-## 2026-01-02
-EOF
-
-# Add exercise
-cat >> /tmp/workouts-2026-01.md << 'EOF'
-
-Pull-ups
-- 10, 10, 10
-EOF
-```
-
-#### Step 3: Push back to GitHub
-
-```bash
-cd /mnt/skills/user/fitness-tracker/scripts
-uv run github_sync.py \
-  --file /tmp/workouts-2026-01.md \
-  --dest workouts/workouts-2026-01.md \
-  -m "Add workout for 2026-01-02"
-```
-
-#### Step 4: Update CSV (optional)
-
-Parse the workout file and push the updated CSV:
-
-```bash
-cd /mnt/skills/user/fitness-tracker/scripts
-uv run parse_workout.py /tmp/workouts-2026-01.md -o /tmp/workouts.csv
-uv run github_sync.py \
-  --file /tmp/workouts.csv \
-  --dest workouts/workouts.csv \
-  -m "Update workout data"
-```
-
-### Key Details
-
-- **Working directory matters** — Must `cd` into `scripts/` so `github_sync.py` can find `config.json`
-- **Config location** — The script looks for `config.json` in the same directory as the script itself
-- **Dest path** — The `--dest` is relative to the repo root (e.g., `workouts/workouts-2026-01.md`)
+### GitHub (Default)
+1. Read `scripts/config.json` to get GitHub settings
+2. Create/update local temp file: `workouts-YYYY-MM.md`
+3. If file exists in repo, fetch it first and append new workout
+4. Add `## YYYY-MM-DD` header if it's a new day
+5. Append exercise name and sets under the date header
+6. Push to GitHub using `scripts/github_sync.py`:
+   ```bash
+   uv run scripts/github_sync.py \
+     --file /tmp/workouts-2026-01.md \
+     --dest workouts/workouts-2026-01.md \
+     -m "Add workout for 2026-01-02"
+   ```
+7. Also push updated `workouts.csv` after parsing:
+   ```bash
+   uv run scripts/parse_workout.py /tmp/workouts-2026-01.md -o /tmp/workouts.csv
+   uv run scripts/github_sync.py \
+     --file /tmp/workouts.csv \
+     --dest workouts/workouts.csv \
+     -m "Update workout data"
+   ```
 
 ### Obsidian (Fallback)
-
 If GitHub is not configured (`github_repo` is empty):
 1. Use `obsidian_workout_dir` from config
 2. Target file: `{obsidian_workout_dir}/workouts-YYYY-MM.md`
