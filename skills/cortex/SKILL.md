@@ -237,41 +237,18 @@ Brief description of the topic.
 
 ## Links
 
-AI coding tools have evolved rapidly, with IDE integrations like Cursor[^1] leading the way in seamless code generation. For terminal-based workflows, Claude Code[^2] offers powerful multi-file editing capabilities.
+AI coding tools have evolved rapidly, with IDE integrations like Cursor leading the way in seamless code generation. For terminal-based workflows, Claude Code offers powerful multi-file editing capabilities. Understanding the underlying architectures is essential for building effective tools.
 
-Understanding the underlying architectures is essential for building effective tools. The patterns for context management and prompt engineering[^3] apply across different implementations.
-
-### Cursor - AI Code Editor
-https://cursor.com
-
-AI-powered code editor built on VS Code. Features include tab completion,
-inline editing, and chat-based code generation using Claude and GPT models.
-
-[^1]: Cursor - AI Code Editor
-
-### Claude Code CLI
-https://claude.ai/claude-code
-
-Command-line coding assistant from Anthropic. Supports file editing,
-terminal commands, and multi-file refactoring directly from the terminal.
-
-[^2]: Claude Code CLI
-
-### Building AI Coding Assistants
-https://example.com/ai-coding-guide
-
-Comprehensive guide on architectures for AI coding tools. Covers prompt
-engineering, context management, and integrating with language servers.
-
-[^3]: Building AI Coding Assistants
+- [Cursor](https://cursor.com) - AI-powered code editor built on VS Code with tab completion, inline editing, and chat-based code generation
+- [Claude Code](https://claude.ai/claude-code) - Command-line coding assistant from Anthropic with file editing and multi-file refactoring
+- [Building AI Coding Assistants](https://example.com/ai-coding-guide) - Guide on architectures, prompt engineering, and context management
 ```
 
 **Link format:**
-- `### Title of Page` - descriptive title
-- URL on its own line
-- Summary based on user's instructions when the link was added
+- Bullet list with `[Title](URL) - description`
+- Keep descriptions concise (one line)
 
-When multiple links exist, add an overview (1-3 paragraphs) at the top of the Links section that synthesizes the resources and references each link using footnotes. Update the overview whenever new links are added to keep it current.
+When multiple links exist, add a brief overview (1-2 sentences) at the top of the Links section that synthesizes the resources. Update the overview when new links are added.
 
 ### Relationship with Daily Notes
 
