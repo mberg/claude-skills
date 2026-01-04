@@ -36,6 +36,13 @@
       "source": "./",
       "strict": false,
       "skills": ["./skills/fitness-tracker"]
+    },
+    {
+      "name": "cortex",
+      "description": "Capture conversation summaries and web content to daily notes synced to GitHub. Use when user says 'save this', 'summarize', 'capture notes', or pastes a URL without context.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/cortex"]
     }
   ]
 }
