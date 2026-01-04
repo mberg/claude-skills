@@ -237,11 +237,17 @@ Brief description of the topic.
 
 ## Links
 
+AI coding tools have evolved rapidly, with IDE integrations like Cursor[^1] leading the way in seamless code generation. For terminal-based workflows, Claude Code[^2] offers powerful multi-file editing capabilities.
+
+Understanding the underlying architectures is essential for building effective tools. The patterns for context management and prompt engineering[^3] apply across different implementations.
+
 ### Cursor - AI Code Editor
 https://cursor.com
 
 AI-powered code editor built on VS Code. Features include tab completion,
 inline editing, and chat-based code generation using Claude and GPT models.
+
+[^1]: Cursor - AI Code Editor
 
 ### Claude Code CLI
 https://claude.ai/claude-code
@@ -249,17 +255,23 @@ https://claude.ai/claude-code
 Command-line coding assistant from Anthropic. Supports file editing,
 terminal commands, and multi-file refactoring directly from the terminal.
 
+[^2]: Claude Code CLI
+
 ### Building AI Coding Assistants
 https://example.com/ai-coding-guide
 
 Comprehensive guide on architectures for AI coding tools. Covers prompt
 engineering, context management, and integrating with language servers.
+
+[^3]: Building AI Coding Assistants
 ```
 
 Each link in a topic gets its own section with:
 - `### Title of Page` - descriptive title
 - URL on its own line
 - Summary based on user's instructions when the link was added
+
+When multiple links exist, add an overview (1-3 paragraphs) at the top of the Links section that synthesizes the resources and references each link using footnotes. Update the overview whenever new links are added to keep it current.
 
 ### Relationship with Daily Notes
 
