@@ -91,14 +91,17 @@ Files are named `YYYY-MM-DD.md` (one file per day). Multiple sessions throughout
 
 When appending a new entry:
 1. Fetch existing daily note
-2. Parse existing entries by their `## HH:MM` timestamps
-3. Insert new entry in chronological order (don't intermix - each summary stays as a complete block)
-4. Push updated file
+2. Find the `# Cortex` section (or create it at the bottom if missing)
+3. Parse existing entries by their `## HH:MM` timestamps
+4. Insert new entry in chronological order (don't intermix - each summary stays as a complete block)
+5. Push updated file
 
 The exact timestamp isn't critical - entries just need to be roughly in order of when they happened.
 
 Example: `2026-01-03.md`
 ```markdown
+# Cortex
+
 ## 14:30 - Architecture Discussion
 
 ### Key Ideas
@@ -121,9 +124,12 @@ Example: `2026-01-03.md`
 ---
 ```
 
+The `# Cortex` header marks the section for cortex entries. When appending, add entries after this header.
+
 ### Format Rules
 
 - **Filename**: `YYYY-MM-DD.md`
+- **Section header**: `# Cortex` at the bottom of the file
 - **Entry header**: `## HH:MM - Title`
 - **Key Ideas section**: `### Key Ideas` with bullet points
 - **Links section**: `### Links` with `[Title](URL) - description`
