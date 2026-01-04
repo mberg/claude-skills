@@ -200,10 +200,16 @@ Topic docs are standalone notes for recurring themes, projects, or reference mat
 
 ### Finding Existing Topics
 
-Before creating a new topic, search for existing matches:
-1. Look for topics with matching or similar names
+Before creating a new topic, search the existing notes in the repo:
+1. Check for notes with matching or similar names to the topic being discussed
 2. If found, suggest: "Should I add this to [[AI Coding]]?"
 3. If multiple matches: "Found related notes: [[AI Coding]], [[AI Tools]], [[Coding Best Practices]]. Which one?"
+
+To check if a topic exists, try fetching it:
+```bash
+cd /mnt/skills/user/cortex/scripts
+uv run github_sync.py --fetch "notes/AI Coding.md"
+```
 
 ### When to Create Topics
 
