@@ -277,7 +277,8 @@ Edit `scripts/config.json` to configure GitHub storage:
   "github_repo": "mberg/cortex",
   "github_token": "github_pat_xxxxx",
   "github_branch": "main",
-  "github_notes_dir": "notes"
+  "github_notes_dir": "notes",
+  "timezone": "America/New_York"
 }
 ```
 
@@ -285,6 +286,7 @@ Edit `scripts/config.json` to configure GitHub storage:
 - `github_token`: Personal Access Token with `repo` scope. Create at: https://github.com/settings/tokens
 - `github_branch`: Target branch (default: `main`)
 - `github_notes_dir`: Directory in repo for notes (default: `notes`)
+- `timezone`: User's timezone for timestamps (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`)
 
 ## GitHub Workflow
 
