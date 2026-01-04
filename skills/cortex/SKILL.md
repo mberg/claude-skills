@@ -36,8 +36,6 @@ If user wants to link to a topic:
 ### Step 5: Format as Daily Note Entry
 Create an entry with timestamp, key ideas, related notes, and links.
 
-**Timestamp:** Read `timezone` from `scripts/config.json` and calculate the current local time. Use format `HH:MM` (24-hour).
-
 ### Step 6: Save to GitHub
 Fetch existing daily note, append new entry, push back.
 
@@ -266,7 +264,7 @@ engineering, context management, and integrating with language servers.
 [^3]: Building AI Coding Assistants
 ```
 
-Each link in a topic gets its own section with:
+**Link format:**
 - `### Title of Page` - descriptive title
 - URL on its own line
 - Summary based on user's instructions when the link was added
@@ -319,32 +317,9 @@ Edit `scripts/config.json` to configure GitHub storage:
 - `github_repo`: Your repository in `username/repo-name` format
 - `github_token`: Personal Access Token with `repo` scope. Create at: https://github.com/settings/tokens
 - `github_branch`: Target branch (default: `main`)
-- `github_notes_dir`: Directory in repo for notes (default: `notes`)
+- `github_notes_dir`: Directory
+in repo for notes (default: `notes`)
 - `timezone`: User's timezone for timestamps (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`)
-
-### Using Timezone for Timestamps
-
-When adding notes, read the `timezone` from config and calculate the local time:
-
-```python
-import json
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
-# Read config
-with open("config.json") as f:
-    config = json.load(f)
-
-# Get current time in user's timezone
-tz = ZoneInfo(config.get("timezone", "UTC"))
-local_time = datetime.now(tz)
-
-# Format for note header: "## 14:30 - Title"
-timestamp = local_time.strftime("%H:%M")
-
-# Format for daily note filename: "2026-01-03.md"
-date_str = local_time.strftime("%Y-%m-%d")
-```
 
 ## GitHub Workflow
 
