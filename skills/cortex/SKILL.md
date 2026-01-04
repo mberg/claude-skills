@@ -14,16 +14,29 @@ When the user wants to save or summarize the current conversation:
 ### Step 1: Ask for Instructions
 Ask: "Any specific focus or instructions for the summary?"
 
-### Step 2: Extract Key Ideas
+### Step 2: Ask About Topics
+Ask: "Any topics to link this to? (e.g., [[AI Coding]], [[Architecture]])"
+
+Before suggesting new topics, search for existing notes that match. If found:
+- Single match: "Should I add this to [[AI Coding]]?"
+- Multiple matches: "Found related notes: [[AI Coding]], [[AI Tools]]. Which one?"
+
+### Step 3: Extract Key Ideas
 Review the conversation and extract:
 - Main concepts and decisions discussed
 - Action items or conclusions
 - Any URLs or resources mentioned
 
-### Step 3: Format as Daily Note Entry
-Create an entry with timestamp, key ideas, and links.
+### Step 4: Create/Update Topic Docs (if specified)
+If user wants to link to a topic:
+- Fetch existing topic file (or create new)
+- Add a reference to today's daily note with 1-sentence summary
+- Push updated topic file
 
-### Step 4: Save to GitHub
+### Step 5: Format as Daily Note Entry
+Create an entry with timestamp, key ideas, related notes, and links.
+
+### Step 6: Save to GitHub
 Fetch existing daily note, append new entry, push back.
 
 ### Example Conversation
@@ -31,7 +44,9 @@ Fetch existing daily note, append new entry, push back.
 User: Save this conversation
 Claude: Any specific focus or instructions for the summary?
 User: Focus on the architecture decisions we made
-Claude: Got it. I'll summarize the architecture decisions.
+Claude: Any topics to link this to? I found [[Event-Driven Architecture]] in your notes.
+User: Yes, add it there. Also create a new note for System Design.
+Claude: Got it. I'll update [[Event-Driven Architecture]] and create [[System Design]].
 
 Saved to 2026-01-03.md:
 ## 14:30 - Architecture Discussion
@@ -39,10 +54,17 @@ Saved to 2026-01-03.md:
 ### Key Ideas
 - Decided to use event-driven architecture for the notification system
 - Will implement retry logic with exponential backoff
-- Database schema will use soft deletes
+- See [[Event-Driven Architecture]] for more details
+
+### Related Notes
+- [[Event-Driven Architecture]]
+- [[System Design]]
 
 ### Links
-- [Event-Driven Architecture](https://example.com/eda) - reference article discussed
+- [EDA Article](https://example.com/eda) - reference article discussed
+
+Updated [[Event-Driven Architecture]] with link to today's discussion.
+Created [[System Design]] with initial notes.
 ```
 
 ## Link Summary Mode
@@ -66,8 +88,10 @@ Add the link with its summary to the daily notes.
 User: https://example.com/article-about-microservices
 Claude: Would you like me to summarize this link?
 User: Yes, focus on the deployment strategies
-Claude: Any other specific instructions?
-User: Keep it brief
+Claude: Any topics to link this to? I found [[Microservices]] in your notes.
+User: Yes, and also [[Deployment Strategies]]
+Claude: Got it. Keep it brief?
+User: Yes
 
 [Fetches and summarizes the article]
 
@@ -79,8 +103,14 @@ Saved to 2026-01-03.md:
 - Canary releases reduce risk for critical services
 - Feature flags enable gradual rollouts
 
+### Related Notes
+- [[Microservices]]
+- [[Deployment Strategies]]
+
 ### Links
-- [Microservices Deployment Strategies](https://example.com/article-about-microservices) - deployment patterns for microservices
+- [Microservices Deployment Strategies](https://example.com/article-about-microservices) - deployment patterns
+
+Updated [[Microservices]] with link to this article.
 ```
 
 ## Daily Notes Format
@@ -107,9 +137,14 @@ Example: `2026-01-03.md`
 ### Key Ideas
 - Decided to use event-driven architecture
 - Will implement retry logic with exponential backoff
+- See [[Event-Driven Architecture]] for more details
+
+### Related Notes
+- [[Event-Driven Architecture]]
+- [[System Design]]
 
 ### Links
-- [Event-Driven Architecture](https://example.com/eda) - reference article
+- [EDA Article](https://example.com/eda) - reference article
 
 ---
 
@@ -117,6 +152,10 @@ Example: `2026-01-03.md`
 
 ### Key Ideas
 - Blue-green deployments recommended for microservices
+
+### Related Notes
+- [[Microservices]]
+- [[Deployment Strategies]]
 
 ### Links
 - [Microservices Guide](https://example.com/guide) - deployment patterns
@@ -132,8 +171,96 @@ The `# Cortex` header marks the section for cortex entries. When appending, add 
 - **Section header**: `# Cortex` at the bottom of the file
 - **Entry header**: `## HH:MM - Title`
 - **Key Ideas section**: `### Key Ideas` with bullet points
+- **Related Notes section**: `### Related Notes` with `[[Topic Name]]` links
 - **Links section**: `### Links` with `[Title](URL) - description`
 - **Entry separator**: `---` between entries
+
+## Internal Links
+
+Use Obsidian-style `[[wiki links]]` to connect notes.
+
+### Inline Links (wiki-style)
+Reference topics naturally in sentences:
+```markdown
+This discussion covered [[AI Coding]] best practices and [[Architecture Patterns]].
+```
+
+### Related Notes Section
+List related topics at the end of an entry:
+```markdown
+### Related Notes
+- [[AI Coding]]
+- [[Cloudflare]]
+- [[Architecture Patterns]]
+```
+
+## Topic Documents
+
+Topic docs are standalone notes for recurring themes, projects, or reference material. They live in the same `notes/` folder as daily notes.
+
+### Finding Existing Topics
+
+Before creating a new topic, search for existing matches:
+1. Look for topics with matching or similar names
+2. If found, suggest: "Should I add this to [[AI Coding]]?"
+3. If multiple matches: "Found related notes: [[AI Coding]], [[AI Tools]], [[Coding Best Practices]]. Which one?"
+
+### When to Create Topics
+
+- Not everything needs a topic file - use judgment
+- Create topics for recurring themes, projects, or reference material
+- Daily notes can reference topics for deeper detail
+
+### Topic Document Structure
+
+```markdown
+# AI Coding
+
+## Overview
+Brief description of the topic.
+
+## Notes
+- [[2026-01-03]] - Discussed using AI for code review
+- [[2026-01-04]] - Explored cursor-based editing workflows
+
+## Related Notes
+- [[Architecture Patterns]]
+- [[Code Review]]
+
+## Links
+- [Cursor](https://cursor.com) - AI-powered code editor
+- [Claude Code](https://claude.ai) - CLI coding assistant
+- [Inspiring Examples](https://example.com) - collection of AI coding demos
+```
+
+### Relationship with Daily Notes
+
+- **Daily note**: Brief summary of what was discussed
+- **Topic file**: More detailed info, expands on concepts
+- Daily note can reference topic: "See [[AI Coding]] for more details"
+- Topic links back to daily note with 1-sentence summary
+
+## Obsidian Markdown Reference
+
+Cortex uses Obsidian-flavored markdown. Reference: https://help.obsidian.md/obsidian-flavored-markdown
+
+### Supported Extensions
+
+| Syntax | Description |
+|--------|-------------|
+| `[[Link]]` | Internal links to other notes |
+| `![[Link]]` | Embed files |
+| `![[Link#^id]]` | Block references |
+| `^id` | Defining a block |
+| `[^id]` | Footnotes |
+| `%%Text%%` | Comments |
+| `~~Text~~` | Strikethroughs |
+| `==Text==` | Highlights |
+| ` ``` ` | Code blocks |
+| `- [ ]` | Incomplete task |
+| `- [x]` | Completed task |
+| `> [!note]` | Callouts |
+| `\|` | Tables |
 
 ## Configuration
 
