@@ -173,7 +173,7 @@ The `# Cortex` header marks the section for cortex entries. When appending, add 
 - **Section header**: `# Cortex` at the bottom of the file
 - **Entry header**: `## HH:MM - Title`
 - **Key Ideas section**: `### Key Ideas` with bullet points
-- **Related Notes section**: `### Related Notes` with `[[Topic Name]]` links
+- **Related Notes section** (optional): `### Related Notes` with `[[Topic Name]]` links - only include if there are related notes (e.g., `[[Claude Code]]`, `[[Architecture Patterns]]`)
 - **Links section**: `### Links` with `[Title](URL) - description`
 - **Entry separator**: `---` between entries
 
