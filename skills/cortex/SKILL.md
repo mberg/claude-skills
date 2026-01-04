@@ -33,7 +33,7 @@ Claude: Any specific focus or instructions for the summary?
 User: Focus on the architecture decisions we made
 Claude: Got it. I'll summarize the architecture decisions.
 
-Saved to notes-2026-01-03.md:
+Saved to 2026-01-03.md:
 ## 14:30 - Architecture Discussion
 
 ### Key Ideas
@@ -71,7 +71,7 @@ User: Keep it brief
 
 [Fetches and summarizes the article]
 
-Saved to notes-2026-01-03.md:
+Saved to 2026-01-03.md:
 ## 15:00 - Link Summary
 
 ### Key Ideas
@@ -85,7 +85,7 @@ Saved to notes-2026-01-03.md:
 
 ## Daily Notes Format
 
-Files are named `notes-YYYY-MM-DD.md` (one file per day). Multiple sessions throughout the day all append to the same file.
+Files are named `YYYY-MM-DD.md` (one file per day). Multiple sessions throughout the day all append to the same file.
 
 ### Ordering Multiple Entries
 
@@ -97,7 +97,7 @@ When appending a new entry:
 
 The exact timestamp isn't critical - entries just need to be roughly in order of when they happened.
 
-Example: `notes-2026-01-03.md`
+Example: `2026-01-03.md`
 ```markdown
 ## 14:30 - Architecture Discussion
 
@@ -123,7 +123,7 @@ Example: `notes-2026-01-03.md`
 
 ### Format Rules
 
-- **Filename**: `notes-YYYY-MM-DD.md`
+- **Filename**: `YYYY-MM-DD.md`
 - **Entry header**: `## HH:MM - Title`
 - **Key Ideas section**: `### Key Ideas` with bullet points
 - **Links section**: `### Links` with `[Title](URL) - description`
@@ -155,7 +155,7 @@ Edit `scripts/config.json` to configure GitHub storage:
 
 ```bash
 cd /mnt/skills/user/cortex/scripts
-uv run github_sync.py --fetch notes/notes-2026-01-03.md > /tmp/notes-2026-01-03.md
+uv run github_sync.py --fetch notes/2026-01-03.md > /tmp/2026-01-03.md
 ```
 
 If the file doesn't exist yet, create it empty.
@@ -163,7 +163,7 @@ If the file doesn't exist yet, create it empty.
 ### Step 2: Append new entry
 
 ```bash
-cat >> /tmp/notes-2026-01-03.md << 'EOF'
+cat >> /tmp/2026-01-03.md << 'EOF'
 
 ## 14:30 - Session Summary
 
@@ -183,8 +183,8 @@ EOF
 ```bash
 cd /mnt/skills/user/cortex/scripts
 uv run github_sync.py \
-  --file /tmp/notes-2026-01-03.md \
-  --dest notes/notes-2026-01-03.md \
+  --file /tmp/2026-01-03.md \
+  --dest notes/2026-01-03.md \
   -m "Add notes for 2026-01-03"
 ```
 
@@ -192,4 +192,4 @@ uv run github_sync.py \
 
 - **Working directory matters** — Must `cd` into `scripts/` so `github_sync.py` can find `config.json`
 - **Config location** — The script looks for `config.json` in the same directory as the script itself
-- **Dest path** — The `--dest` is relative to the repo root (e.g., `notes/notes-2026-01-03.md`)
+- **Dest path** — The `--dest` is relative to the repo root (e.g., `notes/2026-01-03.md`)
