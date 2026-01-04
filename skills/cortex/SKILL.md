@@ -236,10 +236,30 @@ Brief description of the topic.
 - [[Code Review]]
 
 ## Links
-- [Cursor](https://cursor.com) - AI-powered code editor
-- [Claude Code](https://claude.ai) - CLI coding assistant
-- [Inspiring Examples](https://example.com) - collection of AI coding demos
+
+### Cursor - AI Code Editor
+https://cursor.com
+
+AI-powered code editor built on VS Code. Features include tab completion,
+inline editing, and chat-based code generation using Claude and GPT models.
+
+### Claude Code CLI
+https://claude.ai/claude-code
+
+Command-line coding assistant from Anthropic. Supports file editing,
+terminal commands, and multi-file refactoring directly from the terminal.
+
+### Building AI Coding Assistants
+https://example.com/ai-coding-guide
+
+Comprehensive guide on architectures for AI coding tools. Covers prompt
+engineering, context management, and integrating with language servers.
 ```
+
+Each link in a topic gets its own section with:
+- `### Title of Page` - descriptive title
+- URL on its own line
+- Summary based on user's instructions when the link was added
 
 ### Relationship with Daily Notes
 
