@@ -21,10 +21,11 @@ Before suggesting new topics, search for existing notes that match. If found:
 - Single match: "Should I add this to [[AI Coding]]?"
 - Multiple matches: "Found related notes: [[AI Coding]], [[AI Tools]]. Which one?"
 
-### Step 3: Extract Key Ideas
+### Step 3: Extract Key Ideas and Todos
 Review the conversation and extract:
 - Main concepts and decisions discussed
-- Action items or conclusions
+- **Action items** - these go in the `# Todos` section at the top of the daily note
+- Conclusions and decisions made
 - Any URLs or resources mentioned
 
 ### Step 4: Create/Update Topic Docs (if specified)
@@ -50,7 +51,11 @@ Claude: Any topics to link this to? I found [[Event-Driven Architecture]] in you
 User: Yes, add it there. Also create a new note for System Design.
 Claude: Got it. I'll update [[Event-Driven Architecture]] and create [[System Design]].
 
-Saved to 2026-01-03.md:
+Added to Todos section:
+- [ ] Implement retry logic with exponential backoff
+- [ ] Document event schema for notification system
+
+Added to Cortex section (2026-01-03.md):
 ## 14:30 - Architecture Discussion
 
 ### Key Ideas
@@ -97,7 +102,11 @@ User: Yes
 
 [Fetches and summarizes the article]
 
-Saved to 2026-01-03.md:
+Added to Todos section:
+- [ ] Set up blue-green deployment for checkout service
+- [ ] Evaluate feature flag tooling options
+
+Added to Cortex section (2026-01-03.md):
 ## 15:00 - Link Summary
 
 ### Key Ideas
@@ -119,19 +128,45 @@ Updated [[Microservices]] with link to this article.
 
 Files are named `YYYY-MM-DD.md` (one file per day). Multiple sessions throughout the day all append to the same file.
 
+### File Structure
+
+Daily notes have two main sections:
+1. **`# Todos`** - Action items at the top of the file
+2. **`# Cortex`** - Timestamped entries at the bottom
+
 ### Ordering Multiple Entries
 
 When appending a new entry:
 1. Fetch existing daily note
-2. Find the `# Cortex` section (or create it at the bottom if missing)
-3. Parse existing entries by their `## HH:MM` timestamps
-4. Insert new entry in chronological order (don't intermix - each summary stays as a complete block)
-5. Push updated file
+2. Extract any action items/todos from the conversation
+3. Add todos to the `# Todos` section (create at top if missing)
+4. Find the `# Cortex` section (or create it below todos if missing)
+5. Parse existing entries by their `## HH:MM` timestamps
+6. Insert new entry in chronological order (don't intermix - each summary stays as a complete block)
+7. Push updated file
 
 The exact timestamp isn't critical - entries just need to be roughly in order of when they happened.
 
+### Todo Extraction
+
+When summarizing a conversation, look for:
+- Explicit action items ("I need to...", "TODO:", "Action item:")
+- Decisions that require follow-up
+- Tasks mentioned but not completed
+- Next steps discussed
+
+Format todos as Obsidian tasks:
+- `- [ ]` for incomplete tasks
+- `- [x]` for completed tasks
+
 Example: `2026-01-03.md`
 ```markdown
+# Todos
+
+- [ ] Implement retry logic with exponential backoff
+- [ ] Review EDA article and summarize key patterns
+- [ ] Set up blue-green deployment pipeline
+
 # Cortex
 
 ## 14:30 - Architecture Discussion
@@ -165,12 +200,13 @@ Example: `2026-01-03.md`
 ---
 ```
 
-The `# Cortex` header marks the section for cortex entries. When appending, add entries after this header.
+The `# Todos` section stays at the top for easy access. The `# Cortex` header marks the section for timestamped entries.
 
 ### Format Rules
 
 - **Filename**: `YYYY-MM-DD.md`
-- **Section header**: `# Cortex` at the bottom of the file
+- **Todos section**: `# Todos` at the top of the file (action items as `- [ ]` tasks)
+- **Cortex section**: `# Cortex` below todos
 - **Entry header**: `## HH:MM - Title`
 - **Key Ideas section**: `### Key Ideas` with bullet points
 - **Related Notes section** (optional): `### Related Notes` with `[[Topic Name]]` links - only include if there are related notes (e.g., `[[Claude Code]]`, `[[Architecture Patterns]]`)
