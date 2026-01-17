@@ -1,0 +1,20 @@
+{
+  "name": "observable-plot",
+  "owner": {
+    "name": "Matt Berg",
+    "email": "mberg@recodelabs.org"
+  },
+  "metadata": {
+    "description": "Create data visualizations using Observable Plot's declarative grammar of graphics.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "observable-plot",
+      "description": "Create data visualizations using Observable Plot's declarative grammar of graphics. Use for charts, maps, heatmaps, and exploratory data analysis.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./"]
+    }
+  ]
+}
